@@ -26,6 +26,7 @@ import copy
 from telegram import ParseMode
 from gtts import gTTS
 from crosswordstats import lineplot
+from datetime import datetime
 import os
 
 # Enable logging
@@ -333,8 +334,8 @@ def dailytimes_job(context):
             for name in context.chat_data["overall"]:
                 context.chat_data["overall"][name].append(None)
             tz = timezone('EST')
-            now = datetime.datetime.now(tz)
-            context.chat_data["overallDates"].append(f'{now.month}/{now.day}/{now.year}')
+            tomorrow = datetime.now(tz) + datetime.timedelta(days=1)
+            context.chat_data["overallDates"].append(f'{tomorrow.month}/{tomorrow.day}/{tomorrow.year}')
             globalChatData[chatID]['daily'].clear()
             context.bot.unpinChatMessage(chatID)
 
