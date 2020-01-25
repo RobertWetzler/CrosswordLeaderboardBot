@@ -26,7 +26,7 @@ import copy
 from telegram import ParseMode
 from gtts import gTTS
 from crosswordstats import lineplot
-from datetime import datetime
+from datetime import datetime, time
 import os
 
 # Enable logging
@@ -81,20 +81,20 @@ def reset(update, context):
 
 
 def initoverall(update, context):
-    if 'overall' not in context.chat_data:
+    if 'overall' not in context.chat_data or update.message.text.partition(' ')[2] == 'override':
         context.chat_data['overall'] = dict()
         context.chat_data['overall']['Max'] = [30, 559, 24, 70, 39, 26, 16, 30, 15, 33, 65, 22, 29, 38, 43, 16, 23, 29,
-                                               32, 24, 23, 50]
+                                               32, 24, 23, 50, 31, 23]
         context.chat_data['overall']['Macey'] = [None, 34, 40, None, 35, 60, 33, 37, 35, 49, 65, 27, None, 19, 44, 21,
-                                                 48, 48, 30, 33, 25, 38]
+                                                 48, 48, 30, 33, 25, 38, 36, 56]
         context.chat_data['overall']['Asher'] = [71, 124, 40, None, 58, 99, 39, None, 33, 32, 85, 24, 40, 30, 39, 40,
-                                                 None, 51, None, 23, 24, 69]
+                                                 None, 51, None, 23, 24, 69, 66, 80]
         context.chat_data['overall']['Robert'] = [192, 101, 36, None, 111, 62, 51, 225, 78, 251, 149, 42, 97, 53, 206,
-                                                  32, 130, 72, 90, 43, 56, 263]
+                                                  32, 130, 72, 90, 43, 56, 263, 110, 312]
         context.chat_data['overall']['Levi'] = [None, 238, 180, None, 256, None, None, None, 54, 61, 116, None, 86, 69,
-                                                50, 50, None, None, 102, 36, 35, None]
+                                                50, 50, None, None, 102, 36, 35, None, 192, 110]
         context.chat_data['overallDates'] = list()
-        for i in range(1, 24):
+        for i in range(1, 26):
             context.chat_data['overallDates'].append(f'1/{i}/2020')
         for name in context.chat_data['overall']:
             if name not in context.chat_data['daily']:
@@ -175,82 +175,13 @@ def mytime(update, context):
     else:
         update.message.reply_text("No recorded time found for " + key)
 
-
+    
 def dailytimes_manual(update, context):
-    rank = []
-    dailyTimes = context.chat_data['daily']
-    for name, time in dailyTimes.items():
-        if len(rank) == 0:
-            rank.append([name])
-        else:
-            # iterate rank to insert name
-            i = 0
-            inserted = False
-            while i < len(rank) and not (inserted):
-                if time < dailyTimes[rank[i][0]]:
-                    rank.insert(i, [name])
-                    inserted = True
-                elif time == dailyTimes[rank[i][0]]:
-                    rank[i].append(name)
-                    inserted = True
-                else:
-                    i += 1
-            if not (inserted):
-                rank.append([name])
-    if len(rank) == 0:
-        update.message.reply_text("Day passed with no recorded times")
-    else:
-        mg = "Final Rankings for Today:"
-        for i in range(len(rank)):
-            time = dailyTimes[rank[i][0]]
-            seconds = "" + str(time % 60)
-            if time % 60 < 10:
-                seconds = "0" + seconds
-            place = i + 1
-            for name in rank[i]:
-                mg = mg + "\n" + str(place) + " " + name + " - " + str(int(time / 60)) + ":" + seconds + " "
-        if len(rank[0]) == 1:
-            mg += "\n" + rank[0][0] + " won!"
-        elif len(rank[0]) == 2:
-            mg += "\n" + rank[0][0] + " and " + rank[0][1] + " won!"
-        else:
-            mg += "\n"
-            for j in range(len(rank[i] - 1)):
-                mg += rank[0][j] + ", "
-            mg += "and " + rank[0][len(rank[0]) - 1] + " won!"
-        update.message.reply_text(mg)
-        for name in rank[0]:
-            if not (name in context.chat_data['leaderboard']):
-                context.chat_data['leaderboard'][name] = 1
-            else:
-                context.chat_data['leaderboard'][name] += 1
-        totalRank = []
-        for name in context.chat_data['leaderboard']:
-            if len(totalRank) == 0:
-                totalRank.append([name])
-            else:
-                i = 0
-                inserted = False
-                while i < len(totalRank) and not (inserted):
-                    if context.chat_data['leaderboard'][name] > context.chat_data['leaderboard'][totalRank[i][0]]:
-                        totalRank.insert(i, [name])
-                        inserted = True
-                    elif context.chat_data['leaderboard'][name] == context.chat_data['leaderboard'][totalRank[i][0]]:
-                        totalRank[i].append(name)
-                        inserted = True
-                    else:
-                        i += 1
-                if not (inserted):
-                    totalRank.append([name])
-        mg = "Overall Standings:"
-        for i in range(len(totalRank)):
-            for j in range(len(totalRank[i])):
-                name = totalRank[i][j]
-                place = i + 1
-                mg += "\n" + str(place) + " " + name + " - " + str(context.chat_data['leaderboard'][name]) + " "
-        update.message.reply_text(mg)
-        context.chat_data['daily'].clear()
-        context.bot.unpinChatMessage(doobieID)
+    dailytimes_job(context)
+
+
+def removeLastDate(update, context):
+    context.chat_data['overallDates'].pop()
 
 
 def dailytimes_job(context):
@@ -328,14 +259,13 @@ def dailytimes_job(context):
                 for j in range(len(totalRank[i])):
                     name = totalRank[i][j]
                     place = i + 1
-                    mg += "\n" + str(place) + " " + name + " - " + str(
-                        globalChatData[chatID]['leaderboard'][name]) + " "
+                    mg += "\n" + str(place) + " " + name + " - " + str(globalChatData[chatID]['leaderboard'][name]) + " "
             context.bot.send_message(chatID, mg)
-            for name in context.chat_data["overall"]:
-                context.chat_data["overall"][name].append(None)
+            for name in globalChatData[chatID]['overall']:
+                globalChatData[chatID]['overall'][name].append(None)
             tz = timezone('EST')
             tomorrow = datetime.now(tz) + datetime.timedelta(days=1)
-            context.chat_data["overallDates"].append(f'{tomorrow.month}/{tomorrow.day}/{tomorrow.year}')
+            globalChatData[chatID]["overallDates"].append(f'{tomorrow.month}/{tomorrow.day}/{tomorrow.year}')
             globalChatData[chatID]['daily'].clear()
             context.bot.unpinChatMessage(chatID)
 
@@ -470,13 +400,6 @@ def leaderboard(update, context):
     os.remove("leaderboard.ogg")
 
 
-def time_to_est(t):
-    dt = datetime.datetime.combine(datetime.date.today(), t)
-    eastern = timezone('US/Eastern')
-    est_dt = eastern.localize(dt)
-    return est_dt.time()
-
-
 def remind(context):
     context.bot.send_message(doobieID, "End of Crossword Day! Use /endday")
 
@@ -538,6 +461,7 @@ def main():
     dp.add_handler(CommandHandler("sendVar", sendVar))
     dp.add_handler(CommandHandler("initoverall", initoverall))
     dp.add_handler(CommandHandler("stats", stats))
+    dp.add_handler(CommandHandler("removeLastDate", removeLastDate))
     # on noncommand i.e message - echo the message on Telegram
     # log all errors
     dp.add_error_handler(error)
@@ -547,10 +471,9 @@ def main():
     # EST & UTC: Satuday and Sunday
     sixDays = (5, 6)
     # EST: 10 PM. UTC: 3 AM.
-    t10 = datetime.time(3, 0, 0, 0)
-    est_t10 = time_to_est(t10)
+    t10 = time(3, 0, 0, 0)
     # EST: 6 PM. UTC: 11 PM.
-    t6 = datetime.time(23, 0, 0, 0)
+    t6 = time(23, 0, 0, 0)
     # Job at 10 PM EST Mon - Fri
     ten_pm_days = j.run_daily(dailytimes_job, t10, tenDays)
     # Job at 6 PM EST Sat & Sun
