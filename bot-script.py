@@ -25,7 +25,7 @@ import re
 import copy
 from telegram import ParseMode
 from gtts import gTTS
-from crosswordstats import lineplot
+from crosswordstats import lineplot, avgtimes
 from datetime import datetime, time
 import os
 
@@ -138,11 +138,14 @@ def stats(update, context):
     top = None
     if len(topStr) > 0:
         top = int(topStr)
-    lineplot(context.chat_data['overall'],context.chat_data['overallDates'],'overallLinePlot.png', ylim=top)
+    lineplot(context.chat_data['overall'], context.chat_data['overallDates'], 'overallLinePlot.png', ylim=top)
     context.bot.send_photo(chat_id=update.message.chat_id,photo=open('overallLinePlot.png','rb'))
     os.remove('overallLinePlot.png')
 
-
+def averages(update, context):
+    avgtimes(context.chat_data['overall'], context.chat_data['overallDates'], 'avgBars.png')
+    context.bot.send_photo(chat_id=update.message.chat_id, photo=open('avgBars.png','rb'))
+    os.remove('avgBars.png')
 def addtime_msg(update, context):
     key = str(update.message.from_user.first_name)
     value = (update.message.text.partition(':'))
@@ -462,6 +465,7 @@ def main():
     dp.add_handler(CommandHandler("initoverall", initoverall))
     dp.add_handler(CommandHandler("stats", stats))
     dp.add_handler(CommandHandler("removeLastDate", removeLastDate))
+    dp.add_handler(CommandHandler("averages", averages))
     # on noncommand i.e message - echo the message on Telegram
     # log all errors
     dp.add_error_handler(error)
