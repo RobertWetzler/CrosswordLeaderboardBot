@@ -26,7 +26,7 @@ import copy
 from telegram import ParseMode
 from gtts import gTTS
 from crosswordstats import lineplot
-from datetime import datetime, time
+from datetime import datetime, time, timedelta
 import os
 
 # Enable logging
@@ -183,6 +183,9 @@ def dailytimes_manual(update, context):
 def removeLastDate(update, context):
     context.chat_data['overallDates'].pop()
 
+def removeLastTime(update, context):
+    for name in context.chat_data['overall']:
+        context.chat_data['overall'][name].pop()
 
 def dailytimes_job(context):
     global globalChatData
@@ -264,7 +267,7 @@ def dailytimes_job(context):
             for name in globalChatData[chatID]['overall']:
                 globalChatData[chatID]['overall'][name].append(None)
             tz = timezone('EST')
-            tomorrow = datetime.now(tz) + datetime.timedelta(days=1)
+            tomorrow = datetime.now(tz) + timedelta(days=1)
             globalChatData[chatID]["overallDates"].append(f'{tomorrow.month}/{tomorrow.day}/{tomorrow.year}')
             globalChatData[chatID]['daily'].clear()
             context.bot.unpinChatMessage(chatID)
@@ -462,6 +465,7 @@ def main():
     dp.add_handler(CommandHandler("initoverall", initoverall))
     dp.add_handler(CommandHandler("stats", stats))
     dp.add_handler(CommandHandler("removeLastDate", removeLastDate))
+    dp.add_handler(CommandHandler("removeLastTime", removeLastTime))
     # on noncommand i.e message - echo the message on Telegram
     # log all errors
     dp.add_error_handler(error)
