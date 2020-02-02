@@ -130,6 +130,15 @@ def addtime(update, context):
             currentstandings(update, context)
 
 
+def debugtime(update, context):
+    msg = update.message.text.split()
+    index = int(msg[1])-1
+    for i in range(2, len(msg)):
+        nameTime = msg[i].partition('-')
+        name = nameTime[0]
+        time = int(nameTime[2])
+        context.chat_data['overall'][name].insert(index, time)
+
 def testVar(update, context):
     update.message.reply_text(str(globalChatData))
 
@@ -470,6 +479,7 @@ def main():
     dp.add_handler(CommandHandler("removeLastDate", removeLastDate))
     dp.add_handler(CommandHandler("removeLastTime", removeLastTime))
     dp.add_handler(CommandHandler("averages", averages))
+    dp.add_handler(CommandHandler("debugtime",debugtime))
     # on noncommand i.e message - echo the message on Telegram
     # log all errors
     dp.add_error_handler(error)
