@@ -164,6 +164,22 @@ def addtime_msg(update, context):
             first = "0"
         second = value[2]
         total = 60 * int(first) + int(second)
+        # Compare to min time for today and overall
+        tz = timezone('EST')
+        today = datetime.now(tz)
+        if 'minTimes' not in context.chat_data:
+            context.chat_data['minTimes'] = dict()
+        if key not in context.chat_data['minTimes']:
+            context.chat_data['minTimes'][key] = dict()
+        if 'overall' not in context.chat_data['minTimes'][key]:
+            min = context.chat_data['overall'][key][0]
+            for time in context.chat_data['overall'][key]:
+                if time < min:
+                    min = time
+            context.chat_data['minTimes'][key]['overall'] = min
+        if total < context.chat_data['minTimes'][key]['overall']:
+            context.chat_data['minTimes'][key]['overall'] = total
+            update.message.reply_text("New best time for " + key + "!")
         duplicate = False
         if key in context.chat_data['daily']:
             duplicate = context.chat_data['daily'][key] == total
@@ -280,7 +296,7 @@ def dailytimes_job(context):
                 globalChatData[chatID]['overall'][name].append(None)
             tz = timezone('EST')
             tomorrow = datetime.now(tz) + timedelta(days=1)
-            globalChatData[chatID]["overallDates"].append(f'{tomorrow.month}/{tomorrow.day}/{tomorrow.year}')
+            globalChatData[chatID]['overallDates'].append(f'{tomorrow.month}/{tomorrow.day}/{tomorrow.year}')
             globalChatData[chatID]['daily'].clear()
             context.bot.unpinChatMessage(chatID)
 
