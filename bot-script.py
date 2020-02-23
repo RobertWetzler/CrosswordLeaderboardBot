@@ -172,11 +172,16 @@ def addtime_msg(update, context):
         if key not in context.chat_data['minTimes']:
             context.chat_data['minTimes'][key] = dict()
         if 'overall' not in context.chat_data['minTimes'][key]:
-            min = context.chat_data['overall'][key][0]
-            for time in context.chat_data['overall'][key]:
-                if time < min:
-                    min = time
-            context.chat_data['minTimes'][key]['overall'] = min
+            min = None
+            i = 0
+            while min is None and i < len(context.chat_data['overall'][key]):
+                min = context.chat_data['overall'][key][i]
+                i += 1
+            if min is not None:
+                for time in context.chat_data['overall'][key]:
+                    if time is not None and time < min:
+                        min = time
+                context.chat_data['minTimes'][key]['overall'] = min
         if total < context.chat_data['minTimes'][key]['overall']:
             context.chat_data['minTimes'][key]['overall'] = total
             update.message.reply_text("New best time for " + key + "!")
