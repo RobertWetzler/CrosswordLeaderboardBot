@@ -212,16 +212,15 @@ def addtime_msg(update, context):
                 context.chat_data['minTimes'][name][days[day_index]] = min_time
         # Check if new best day and overall time
         if total < context.chat_data['minTimes'][name][days[day_index]]:
-            context.chat_data['minTimes'][name][days[day_index]] = total
             best_time_for = days[day_index]
             time_diff = time_to_string(context.chat_data['minTimes'][name][days[day_index]] - total)
             best_time_for += f' (\u2193 {time_diff})'
-            best_time_for += f' (\u2193 {time_diff}'
+            context.chat_data['minTimes'][name][days[day_index]] = total
             if total < context.chat_data['minTimes'][name]['overall']:
-                context.chat_data['minTimes'][name]['overall'] = total
                 best_time_for += ' and overall'
                 time_diff = time_to_string(context.chat_data['minTimes'][name]['overall'] - total)
                 best_time_for += f' (\u2193 {time_diff})'
+                context.chat_data['minTimes'][name]['overall'] = total
             update.message.reply_text(f"New best {best_time_for} time for " + name + "!")
         duplicate = False
         # Mark as duplicate
