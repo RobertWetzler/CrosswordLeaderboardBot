@@ -132,15 +132,17 @@ def addtime(update, context):
 
 def debugtime(update, context):
     msg = update.message.text.split()
-    index = int(msg[1])-1
+    index = int(msg[1]) - 1
     for i in range(2, len(msg)):
         nameTime = msg[i].partition('-')
         name = nameTime[0]
         time = int(nameTime[2])
         context.chat_data['overall'][name].insert(index, time)
 
+
 def testVar(update, context):
     update.message.reply_text(str(globalChatData))
+
 
 def stats(update, context):
     topStr = update.message.text.partition(' ')[2]
@@ -148,15 +150,18 @@ def stats(update, context):
     if len(topStr) > 0:
         top = int(topStr)
     lineplot(context.chat_data['overall'], context.chat_data['overallDates'], 'overallLinePlot.png', ylim=top)
-    context.bot.send_photo(chat_id=update.message.chat_id,photo=open('overallLinePlot.png','rb'))
+    context.bot.send_photo(chat_id=update.message.chat_id, photo=open('overallLinePlot.png', 'rb'))
     os.remove('overallLinePlot.png')
+
 
 def averages(update, context):
     avgtimes(context.chat_data['overall'], context.chat_data['overallDates'], 'avgBars.png')
-    context.bot.send_photo(chat_id=update.message.chat_id, photo=open('avgBars.png','rb'))
+    context.bot.send_photo(chat_id=update.message.chat_id, photo=open('avgBars.png', 'rb'))
     os.remove('avgBars.png')
+
+
 def addtime_msg(update, context):
-    key = str(update.message.from_user.first_name)
+    name = str(update.message.from_user.first_name)
     value = (update.message.text.partition(':'))
     if len(value[2]) != 0 & value[0].isdigit() & value[2].isdigit():
         first = value[0]
@@ -169,31 +174,77 @@ def addtime_msg(update, context):
         today = datetime.now(tz)
         if 'minTimes' not in context.chat_data:
             context.chat_data['minTimes'] = dict()
-        if key not in context.chat_data['minTimes']:
-            context.chat_data['minTimes'][key] = dict()
-        if 'overall' not in context.chat_data['minTimes'][key]:
-            min = None
+        if name not in context.chat_data['minTimes']:
+            context.chat_data['minTimes'][name] = dict()
+        if 'overall' not in context.chat_data['minTimes'][name]:
+            min_time = None
             i = 0
-            while min is None and i < len(context.chat_data['overall'][key]):
-                min = context.chat_data['overall'][key][i]
+            while min_time is None and i < len(context.chat_data['overall'][name]):
+                min_time = context.chat_data['overall'][name][i]
                 i += 1
-            if min is not None:
-                for time in context.chat_data['overall'][key]:
-                    if time is not None and time < min:
-                        min = time
-                context.chat_data['minTimes'][key]['overall'] = min
-        if total < context.chat_data['minTimes'][key]['overall']:
-            context.chat_data['minTimes'][key]['overall'] = total
-            update.message.reply_text("New best time for " + key + "!")
+            if min_time is not None:
+                for current_time in context.chat_data['overall'][name]:
+                    if current_time is not None and current_time < min_time:
+                        min_time = current_time
+                context.chat_data['minTimes'][name]['overall'] = min_time
+        days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+        today = context.chat_data['overallDates'][-1].split('/')
+        day_index = datetime(int(today[2]), int(today[0]), int(today[1])).weekday()
+        if days[day_index] not in context.chat_data['minTimes'][name]:
+            # Get index of first day
+            first_day = context.chat_data['overallDates'][0].split('/')
+            first_day_index = datetime(int(first_day[2]), int(first_day[0]), int(first_day[1])).weekday()
+            # Shift index so first day corresponds to 0
+            start_index = day_index - first_day_index
+            if start_index < 0:
+                start_index += 7
+            min_time = None
+            i = start_index
+            while min_time is None and i < len(context.chat_data['overall'][name]):
+                min_time = context.chat_data['overall'][name][i]
+                i += 7
+            if min_time is not None:
+                while i < len(context.chat_data['overall'][name]):
+                    current_time = context.chat_data['overall'][name][i]
+                    if current_time is not None and current_time < min_time:
+                        min_time = current_time
+                    i += 7
+                context.chat_data['minTimes'][name][days[day_index]] = min_time
+        # Check if new best day and overall time
+        if total < context.chat_data['minTimes'][name][days[day_index]]:
+            context.chat_data['minTimes'][name][days[day_index]] = total
+            best_time_for = days[day_index]
+            time_diff = time_to_string(context.chat_data['minTimes'][name][days[day_index]] - total)
+            best_time_for += f' (\u2193 {time_diff})'
+            best_time_for += f' (\u2193 {time_diff}'
+            if total < context.chat_data['minTimes'][name]['overall']:
+                context.chat_data['minTimes'][name]['overall'] = total
+                best_time_for += ' and overall'
+                time_diff = time_to_string(context.chat_data['minTimes'][name]['overall'] - total)
+                best_time_for += f' (\u2193 {time_diff})'
+            update.message.reply_text(f"New best {best_time_for} time for " + name + "!")
         duplicate = False
-        if key in context.chat_data['daily']:
-            duplicate = context.chat_data['daily'][key] == total
-        context.chat_data['overall'][key][-1] = total
+        # Mark as duplicate
+        if name in context.chat_data['daily']:
+            duplicate = context.chat_data['daily'][name] == total
+            # Make min time none if it is being overwritten by newly sent time
+            if not duplicate and days[day_index] in context.chat_data['minTimes'][name] and \
+                    context.chat_data['daily'][name] == context.chat_data['minTimes'][name][days[day_index]]:
+                del context.chat_data['minTimes'][name][days[day_index]]
+                min_deleted = days[day_index]
+                if 'overall' in context.chat_data['minTimes'][name] and \
+                        context.chat_data['daily'][name] == context.chat_data['minTimes'][name]['overall']:
+                    del context.chat_data['minTimes'][name]['overall']
+                    min_deleted += " and overall"
+                update.message.reply_text(f"Deleted best {min_deleted} time for {name}. Will be recalculated upon "
+                                          f"next entry.")
+        # Add time to end of overall list
+        context.chat_data['overall'][name][-1] = total
         global globalChatData
-        if not update.message.chat_id in globalChatData:
+        if update.message.chat_id not in globalChatData:
             globalChatData[update.message.chat_id] = context.chat_data
-        context.chat_data['daily'][key] = total
-        if not (duplicate):
+        context.chat_data['daily'][name] = total
+        if not duplicate:
             currentstandings(update, context)
 
 
@@ -201,14 +252,11 @@ def mytime(update, context):
     key = str(update.message.from_user.first_name)
     time = context.chat_data['daily'][key]
     if key in context.chat_data['daily']:
-        seconds = str(time % 60)
-        if time % 60 < 10:
-            seconds = "0" + seconds
-        update.message.reply_text(str(int(time / 60)) + ":" + seconds)
+        update.message.reply_text(time_to_string(time))
     else:
         update.message.reply_text("No recorded time found for " + key)
 
-    
+
 def dailytimes_manual(update, context):
     dailytimes_job(context)
 
@@ -216,9 +264,11 @@ def dailytimes_manual(update, context):
 def removeLastDate(update, context):
     context.chat_data['overallDates'].pop()
 
+
 def removeLastTime(update, context):
     for name in context.chat_data['overall']:
         context.chat_data['overall'][name].pop()
+
 
 def dailytimes_job(context):
     global globalChatData
@@ -249,12 +299,9 @@ def dailytimes_job(context):
             mg = "Final Rankings for Today:"
             for i in range(len(rank)):
                 time = dailyTimes[rank[i][0]]
-                seconds = "" + str(time % 60)
-                if time % 60 < 10:
-                    seconds = "0" + seconds
                 place = i + 1
                 for name in rank[i]:
-                    mg = mg + "\n" + str(place) + " " + name + " - " + str(int(time / 60)) + ":" + seconds + " "
+                    mg = mg + "\n" + str(place) + " " + name + " - " + time_to_string(time) + " "
             if len(rank[0]) == 1:
                 mg += "\n" + rank[0][0] + " won!"
             elif len(rank[0]) == 2:
@@ -295,7 +342,8 @@ def dailytimes_job(context):
                 for j in range(len(totalRank[i])):
                     name = totalRank[i][j]
                     place = i + 1
-                    mg += "\n" + str(place) + " " + name + " - " + str(globalChatData[chatID]['leaderboard'][name]) + " "
+                    mg += "\n" + str(place) + " " + name + " - " + str(
+                        globalChatData[chatID]['leaderboard'][name]) + " "
             context.bot.send_message(chatID, mg)
             for name in globalChatData[chatID]['overall']:
                 globalChatData[chatID]['overall'][name].append(None)
@@ -325,7 +373,7 @@ def currentstandings(update, context):
                     inserted = True
                 else:
                     i += 1
-            if not (inserted):
+            if not inserted:
                 rank.append([name])
     if len(rank) == 0:
         update.message.reply_text("No recorded times found for today")
@@ -471,6 +519,12 @@ def sendVar(update, context):
         context.bot.send_message(chatID, str(globalChatData[chatID]))
 
 
+def time_to_string(time):
+    seconds = "" + str(time % 60)
+    if time % 60 < 10:
+        seconds = "0" + seconds
+    return str(int(time / 60)) + ":" + seconds
+
 def main():
     """Start the bot."""
     # Create the Updater and pass it your bot's token.
@@ -500,7 +554,7 @@ def main():
     dp.add_handler(CommandHandler("removeLastDate", removeLastDate))
     dp.add_handler(CommandHandler("removeLastTime", removeLastTime))
     dp.add_handler(CommandHandler("averages", averages))
-    dp.add_handler(CommandHandler("debugtime",debugtime))
+    dp.add_handler(CommandHandler("debugtime", debugtime))
     # on noncommand i.e message - echo the message on Telegram
     # log all errors
     dp.add_error_handler(error)
