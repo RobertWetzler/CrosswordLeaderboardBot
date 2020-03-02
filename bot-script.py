@@ -524,6 +524,11 @@ def time_to_string(time):
         seconds = "0" + seconds
     return str(int(time / 60)) + ":" + seconds
 
+def testTimezone(context):
+    for chatID in globalChatData:
+        context.bot.send_message(chatID, 'Test: If it is 10 PM Eastern right now, then using timezones worked. '
+                                         'Otherwise, whoopsies!')
+
 def main():
     """Start the bot."""
     # Create the Updater and pass it your bot's token.
@@ -566,10 +571,13 @@ def main():
     t10 = time(3, 0, 0, 0)
     # EST: 6 PM. UTC: 11 PM.
     t6 = time(23, 0, 0, 0)
+    testTime = time(3, 0, 0, 0, timezone('EST'))
+    everyday = tuple(range(7))
     # Job at 10 PM EST Mon - Fri
     ten_pm_days = j.run_daily(dailytimes_job, t10, tenDays)
     # Job at 6 PM EST Sat & Sun
     six_pm_days = j.run_daily(dailytimes_job, t6, sixDays)
+    test_job = j.run_daily(testTimezone, testTime, everyday)
     # repeat = j.run_repeating(sendJob, interval=5, first = 0)
     # Start the Bot
     # j.start()
