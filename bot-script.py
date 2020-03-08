@@ -568,16 +568,13 @@ def main():
     # EST & UTC: Satuday and Sunday
     sixDays = (5, 6)
     # EST: 10 PM. UTC: 3 AM.
-    t10 = time(3, 0, 0, 0)
+    t10 = time(2, 0, 0, 0)
     # EST: 6 PM. UTC: 11 PM.
-    t6 = time(23, 0, 0, 0)
-    testTime = time(3, 0, 0, 0, timezone('EST'))
-    everyday = tuple(range(7))
+    t6 = time(22, 0, 0, 0)
     # Job at 10 PM EST Mon - Fri
     ten_pm_days = j.run_daily(dailytimes_job, t10, tenDays)
     # Job at 6 PM EST Sat & Sun
     six_pm_days = j.run_daily(dailytimes_job, t6, sixDays)
-    test_job = j.run_daily(testTimezone, testTime, everyday)
     # repeat = j.run_repeating(sendJob, interval=5, first = 0)
     # Start the Bot
     # j.start()
