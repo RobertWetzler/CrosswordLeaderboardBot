@@ -517,6 +517,12 @@ def sendVar(update, context):
     for chatID in globalChatData:
         context.bot.send_message(chatID, str(globalChatData[chatID]))
 
+def minTimes(update, context):
+    name = str(update.message.from_user.first_name)
+    mg = f'Best times for {name}:'
+    for day in context.chat_data['minTimes'][name]:
+        mg += f'\n{day} - {time_to_string(context.chat_data["minTimes"][name][day])}'
+    update.message.reply_text(mg)
 
 def time_to_string(time):
     seconds = "" + str(time % 60)
