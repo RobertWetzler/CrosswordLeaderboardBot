@@ -565,6 +565,7 @@ def main():
     dp.add_handler(CommandHandler("removeLastTime", removeLastTime))
     dp.add_handler(CommandHandler("averages", averages))
     dp.add_handler(CommandHandler("debugtime", debugtime))
+    dp.add_handler(CommandHandler("best", minTimes))
     # on noncommand i.e message - echo the message on Telegram
     # log all errors
     dp.add_error_handler(error)
