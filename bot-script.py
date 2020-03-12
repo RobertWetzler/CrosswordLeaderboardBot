@@ -535,6 +535,10 @@ def testTimezone(context):
         context.bot.send_message(chatID, 'Test: If it is 10 PM Eastern right now, then using timezones worked. '
                                          'Otherwise, whoopsies!')
 
+def sticker_id(update, context):
+    if update.message.from_user.id == robertID:
+        update.message.reply_text(update.message.sticker.file_id)
+
 def main():
     """Start the bot."""
     # Create the Updater and pass it your bot's token.
@@ -566,6 +570,7 @@ def main():
     dp.add_handler(CommandHandler("averages", averages))
     dp.add_handler(CommandHandler("debugtime", debugtime))
     dp.add_handler(CommandHandler("best", minTimes))
+    dp.add_handler(MessageHandler(Filters.sticker, sticker_id))
     # on noncommand i.e message - echo the message on Telegram
     # log all errors
     dp.add_error_handler(error)
