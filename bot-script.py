@@ -23,7 +23,7 @@ import requests
 from uuid import uuid4
 import re
 import copy
-from telegram import ParseMode
+from telegram import ParseMode, Sticker
 from gtts import gTTS
 from datetime import datetime, time, timedelta
 from crosswordstats import lineplot, avgtimes
@@ -39,7 +39,6 @@ robertID = ***REMOVED***
 # doobieID = 's1392971649'
 doobieID = ***REMOVED***
 globalChatData = dict()
-
 
 # Define a few command handlers. These usually take the two arguments update and
 # context. Error handlers also receive the raised TelegramError object in error.
@@ -172,6 +171,9 @@ def addtime_msg(update, context):
         # Compare to min time for today and overall
         tz = timezone('EST')
         today = datetime.now(tz)
+        if name == 'Max' and total == 26:
+            update.message.reply_sticker(sticker=
+                                         'CAACAgEAAxkBAAICJ15pj6hc7Nr4zNyJQT7camZOEgPUAAKGAAOkJocMxc_x7wE2OzwYBA')
         if 'minTimes' not in context.chat_data:
             context.chat_data['minTimes'] = dict()
         if name not in context.chat_data['minTimes']:
@@ -538,7 +540,7 @@ def testTimezone(context):
 def sticker_id(update, context):
     if update.message.from_user.id == robertID:
         update.message.reply_text(update.message.sticker.file_id)
-
+        update.message.reply_sticker(sticker=update.message.sticker.file_id)
 def main():
     """Start the bot."""
     # Create the Updater and pass it your bot's token.
