@@ -27,21 +27,28 @@ def lineplot(overall_dict, dates, filename, ylim=None):
 def lineplot_best(overall_dict, dates, filename, ylim=None):
     fig, ax = plt.subplots()
     x = [dt.datetime.strptime(d, '%m/%d/%Y').date() for d in dates]
-    best = []
+
+    x_non = []
+    x_sat = []
+    best_non = []
+    best_sat = []
     for name in overall_dict:
-        if len(best) < len(overall_dict[name]):
-            best = list(overall_dict[name])
-        else:
-            for i in range(len(best)):
-                if overall_dict[name][i] != None and best[i] > overall_dict[name][i]:
-                    best[i] = overall_dict[name][i]
-    plt.plot(x, best, 'o-b', label="Best Time", ms=3)
+        for i in range(len(overall_dict[name])):
+            x_curr, best_curr = x_sat, best_sat if i % 7 == 3 else x_non, best_non
+            x_curr.append(x[i])
+            if len(best) < len(overall_dict[name]):
+                best_curr.append(overall_dict[name][i])
+            elif overall_dict[name][i] != None and best[i] > overall_dict[name][i]:
+                best_curr[i] = overall_dict[name][i]
+    plt.plot(x_non, best_non, 'o-k', label="Mini Crosswords", ms=3)
+    plt.plot(x_sat, best_sat, 'o-b', label="Saturday Midi's", ms=3)
+
     plt.gcf().autofmt_xdate()
     formatter = matplotlib.ticker.FuncFormatter(lambda s, y: time.strftime('%M:%S', time.gmtime(s)))
     ax.yaxis.set_major_formatter(formatter)
     ax.xaxis.set_major_locator(mdates.AutoDateLocator())
     ax.xaxis.set_major_formatter(DateFormatter("%m-%d"))
-    plt.title("Doobie Brothers Crossword Times")
+    plt.title("Best of The Doobies")
     plt.legend()
     plt.xlabel('Day')
     plt.ylabel('Time')
