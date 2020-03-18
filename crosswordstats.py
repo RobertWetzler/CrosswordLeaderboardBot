@@ -36,9 +36,9 @@ def lineplot_best(overall_dict, dates, filename, ylim=None):
         for i in range(len(overall_dict[name])):
             x_curr, best_curr = (x_sat, best_sat) if i % 7 == 3 else (x_non, best_non)
             x_curr.append(x[i])
-            if len(best) < len(overall_dict[name]):
+            if (len(best_non) + len(best_sat)) < len(overall_dict[name]):
                 best_curr.append(overall_dict[name][i])
-            elif overall_dict[name][i] != None and best[i] > overall_dict[name][i]:
+            elif overall_dict[name][i] != None and best_curr[i] > overall_dict[name][i]:
                 best_curr[i] = overall_dict[name][i]
     plt.plot(x_non, best_non, 'o-k', label="Mini Crosswords", ms=3)
     plt.plot(x_sat, best_sat, 'o-b', label="Saturday Midi's", ms=3)
