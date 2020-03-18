@@ -63,7 +63,7 @@ def help(update, context):
 def error(update, context):
     """Log Errors caused by Updates."""
     logger.warning('Update "%s" caused error "%s". Chat data: %s', update, context.error, context.chat_data)
-
+    update.message.reply_text(context.error)
 
 def reset(update, context):
     mg = update.message.text.partition(' ')[2].partition(' ')
