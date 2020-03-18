@@ -26,7 +26,7 @@ import copy
 from telegram import ParseMode, Sticker
 from gtts import gTTS
 from datetime import datetime, time, timedelta
-from crosswordstats import lineplot, avgtimes
+from crosswordstats import lineplot, avgtimes, lineplot_best
 import os
 
 # Enable logging
@@ -149,6 +149,15 @@ def stats(update, context):
     if len(topStr) > 0:
         top = int(topStr)
     lineplot(context.chat_data['overall'], context.chat_data['overallDates'], 'overallLinePlot.png', ylim=top)
+    context.bot.send_photo(chat_id=update.message.chat_id, photo=open('overallLinePlot.png', 'rb'))
+    os.remove('overallLinePlot.png')
+
+def stats_best(update, context):
+    topStr = update.message.text.partition(' ')[2]
+    top = None
+    if len(topStr) > 0:
+        top = int(topStr)
+    lineplot_best(context.chat_data['overall'], context.chat_data['overallDates'], 'overallLinePlot.png', ylim=top)
     context.bot.send_photo(chat_id=update.message.chat_id, photo=open('overallLinePlot.png', 'rb'))
     os.remove('overallLinePlot.png')
 
@@ -567,6 +576,7 @@ def main():
     dp.add_handler(CommandHandler("sendVar", sendVar))
     dp.add_handler(CommandHandler("initoverall", initoverall))
     dp.add_handler(CommandHandler("stats", stats))
+    dp.add_handler(CommandHandler("stats_best", stats_best))
     dp.add_handler(CommandHandler("removeLastDate", removeLastDate))
     dp.add_handler(CommandHandler("removeLastTime", removeLastTime))
     dp.add_handler(CommandHandler("averages", averages))

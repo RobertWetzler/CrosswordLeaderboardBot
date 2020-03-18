@@ -24,6 +24,31 @@ def lineplot(overall_dict, dates, filename, ylim=None):
         plt.ylim(top=ylim)
     plt.savefig(filename, dpi=500)
 
+def lineplot_best(overall_dict, dates, filename, ylim=None):
+    fig, ax = plt.subplots()
+    x = [dt.datetime.strptime(d, '%m/%d/%Y').date() for d in dates]
+    best = []
+    for name in overall_dict:
+        if len(best) < len(overall_dict[name]):
+            best = list(overall_dict[name])
+        else:
+            for i in range(len(best)):
+                if best[i] > overall_dict[name][i]:
+                    best[i] = overall_dict[name][i]
+    plt.plot(x, best, 'o-b', label="Best Time", ms=3)
+    plt.gcf().autofmt_xdate()
+    formatter = matplotlib.ticker.FuncFormatter(lambda s, y: time.strftime('%M:%S', time.gmtime(s)))
+    ax.yaxis.set_major_formatter(formatter)
+    ax.xaxis.set_major_locator(mdates.AutoDateLocator())
+    ax.xaxis.set_major_formatter(DateFormatter("%m-%d"))
+    plt.title("Doobie Brothers Crossword Times")
+    plt.legend()
+    plt.xlabel('Day')
+    plt.ylabel('Time')
+    if ylim is not None:
+        plt.ylim(top=ylim)
+    plt.savefig(filename, dpi=500)
+
 def avgtimes(overall_dict, dates, filename):
     week_avgs = dict()
     for name in overall_dict:
