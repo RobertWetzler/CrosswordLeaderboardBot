@@ -27,19 +27,19 @@ def lineplot(overall_dict, dates, filename, ylim=None):
 def lineplot_best(overall_dict, dates, filename, ylim=None):
     fig, ax = plt.subplots()
     x = [dt.datetime.strptime(d, '%m/%d/%Y').date() for d in dates]
-
+    
     x_non = []
     x_sat = []
     best_non = []
     best_sat = []
     for name in overall_dict:
         for i in range(len(overall_dict[name])):
-            x_curr, best_curr = (x_sat, best_sat) if i % 7 == 3 else (x_non, best_non)
-            x_curr.append(x[i])
+            x_curr, best_curr, idx = (x_sat, best_sat, i / 7) if i % 7 == 3 else (x_non, best_non, i - (i + 4) / 7)
             if (len(best_non) + len(best_sat)) < len(overall_dict[name]):
                 best_curr.append(overall_dict[name][i])
-            elif overall_dict[name][i] != None and best_curr[i] > overall_dict[name][i]:
-                best_curr[i] = overall_dict[name][i]
+                x_curr.append(x[i])
+            elif overall_dict[name][i] != None and best_curr[idx] > overall_dict[name][i]:
+                best_curr[idx] = overall_dict[name][i]
     plt.plot(x_non, best_non, 'o-k', label="Mini Crosswords", ms=3)
     plt.plot(x_sat, best_sat, 'o-b', label="Saturday Midi's", ms=3)
 
