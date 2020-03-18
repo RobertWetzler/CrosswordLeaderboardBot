@@ -34,7 +34,7 @@ def lineplot_best(overall_dict, dates, filename, ylim=None):
     best_sat = []
     for name in overall_dict:
         for i in range(len(overall_dict[name])):
-            x_curr, best_curr = x_sat, best_sat if i % 7 == 3 else x_non, best_non
+            x_curr, best_curr = (x_sat, best_sat) if i % 7 == 3 else (x_non, best_non)
             x_curr.append(x[i])
             if len(best) < len(overall_dict[name]):
                 best_curr.append(overall_dict[name][i])
