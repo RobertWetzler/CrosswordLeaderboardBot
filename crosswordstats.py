@@ -33,7 +33,7 @@ def lineplot_best(overall_dict, dates, filename, ylim=None):
             best = list(overall_dict[name])
         else:
             for i in range(len(best)):
-                if best[i] > overall_dict[name][i]:
+                if overall_dict[name][i] != None and best[i] > overall_dict[name][i]:
                     best[i] = overall_dict[name][i]
     plt.plot(x, best, 'o-b', label="Best Time", ms=3)
     plt.gcf().autofmt_xdate()
