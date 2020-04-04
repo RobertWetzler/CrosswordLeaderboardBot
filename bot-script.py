@@ -577,7 +577,7 @@ def emoji_status(level):
         status = emojis[value][0]
         emoji = ((level // 100) * '💯') + emojis[value][1]
     if level > 100:
-        status += ' ' + (((level + 1) // 100) * 'I')
+        status += ' ' + (((level // 100) + 1) * 'I')
     return [status, emoji, just_attained]
 
 
