@@ -40,6 +40,7 @@ robertID = 210183844
 doobieID = -1001392971649
 globalChatData = dict()
 
+
 # Define a few command handlers. These usually take the two arguments update and
 # context. Error handlers also receive the raised TelegramError object in error.
 def start(update, context):
@@ -64,6 +65,7 @@ def error(update, context):
     """Log Errors caused by Updates."""
     logger.warning('Update "%s" caused error "%s". Chat data: %s', update, context.error, context.chat_data)
     update.message.reply_text(context.error)
+
 
 def reset(update, context):
     mg = update.message.text.partition(' ')[2].partition(' ')
@@ -151,6 +153,7 @@ def stats(update, context):
     lineplot(context.chat_data['overall'], context.chat_data['overallDates'], 'overallLinePlot.png', ylim=top)
     context.bot.send_photo(chat_id=update.message.chat_id, photo=open('overallLinePlot.png', 'rb'))
     os.remove('overallLinePlot.png')
+
 
 def stats_best(update, context):
     topStr = update.message.text.partition(' ')[2]
@@ -322,38 +325,45 @@ def dailytimes_job(context):
                     mg += rank[0][j] + ", "
                 mg += "and " + rank[0][len(rank[0]) - 1] + " won!"
             context.bot.send_message(chatID, mg)
+            win_statuses = []
             for name in rank[0]:
                 if not (name in globalChatData[chatID]['leaderboard']):
                     globalChatData[chatID]['leaderboard'][name] = 1
                 else:
                     globalChatData[chatID]['leaderboard'][name] += 1
-            totalRank = []
+                status = emoji_status(globalChatData[chatID]['leaderboard'][name])
+                if status[2]:
+                    win_statuses.append(f'{name} attained {status[0]} status!')
+            total_rank = []
             for name in globalChatData[chatID]['leaderboard']:
-                if len(totalRank) == 0:
-                    totalRank.append([name])
+                if len(total_rank) == 0:
+                    total_rank.append([name])
                 else:
                     i = 0
                     inserted = False
-                    while i < len(totalRank) and not (inserted):
-                        if globalChatData[chatID]['leaderboard'][name] > globalChatData[chatID]['leaderboard'][
-                            totalRank[i][0]]:
-                            totalRank.insert(i, [name])
+                    while i < len(total_rank) and not inserted:
+                        if globalChatData[chatID]['leaderboard'][name] > \
+                                globalChatData[chatID]['leaderboard'][total_rank[i][0]]:
+                            total_rank.insert(i, [name])
                             inserted = True
                         elif globalChatData[chatID]['leaderboard'][name] == globalChatData[chatID]['leaderboard'][
-                            totalRank[i][0]]:
-                            totalRank[i].append(name)
+                            total_rank[i][0]]:
+                            total_rank[i].append(name)
                             inserted = True
                         else:
                             i += 1
-                    if not (inserted):
-                        totalRank.append([name])
+                    if not inserted:
+                        total_rank.append([name])
             mg = "Overall Standings:"
-            for i in range(len(totalRank)):
-                for j in range(len(totalRank[i])):
-                    name = totalRank[i][j]
+            for i in range(len(total_rank)):
+                for j in range(len(total_rank[i])):
+                    name = total_rank[i][j]
                     place = i + 1
                     mg += "\n" + str(place) + " " + name + " - " + str(
-                        globalChatData[chatID]['leaderboard'][name]) + " "
+                        globalChatData[chatID]['leaderboard'][name]) + " " + \
+                        emoji_status(globalChatData[chatID]['leaderboard'][name])[1]
+            for win_status in win_statuses:
+                mg += "\n" + win_status
             context.bot.send_message(chatID, mg)
             for name in globalChatData[chatID]['overall']:
                 globalChatData[chatID]['overall'][name].append(None)
@@ -494,15 +504,12 @@ def leaderboard(update, context):
     os.remove("leaderboard.ogg")
 
 
-def remind(context):
-    context.bot.send_message(doobieID, "End of Crossword Day! Use /endday")
-
-
 def insultmax(update, context):
     insults = ["Max sux", "Max is a doodee poopoo head", "Ew", "Did someone just fart? Oh nevermind, it was Max",
                "Max sucks at crossword", "Max is a poop poop poopy poop poop doodoodoodoodoodoodoo fart."]
     if str(update.message.from_user.first_name) == "Max":
-        mg = "Wow great job entering that command there Max. I know that was you and not someone else. I'm not stupid, like you. Fuck you."
+        mg = "Wow great job entering that command there Max. I know that was you and not someone else. I'm not " \
+             "stupid, like you. Fuck you."
     else:
         mg = insults[random.randrange(5)]
     audio = gTTS(text=mg, lang='en', slow=False)
@@ -528,6 +535,7 @@ def sendVar(update, context):
     for chatID in globalChatData:
         context.bot.send_message(chatID, str(globalChatData[chatID]))
 
+
 def minTimes(update, context):
     name = str(update.message.from_user.first_name)
     mg = f'Best times for {name}:'
@@ -535,21 +543,44 @@ def minTimes(update, context):
         mg += f'\n{day} - {time_to_string(context.chat_data["minTimes"][name][day])}'
     update.message.reply_text(mg)
 
+
 def time_to_string(time):
     seconds = "" + str(time % 60)
     if time % 60 < 10:
         seconds = "0" + seconds
     return str(int(time / 60)) + ":" + seconds
 
+
 def testTimezone(context):
     for chatID in globalChatData:
         context.bot.send_message(chatID, 'Test: If it is 10 PM Eastern right now, then using timezones worked. '
                                          'Otherwise, whoopsies!')
 
-def sticker_id(update, context):
-    if update.message.from_user.id == robertID:
-        update.message.reply_text(update.message.sticker.file_id)
-        update.message.reply_sticker(sticker=update.message.sticker.file_id)
+
+def emoji_status(level):
+    emojis = {1: ['Paper', '📝'], 2: ['Cotton', '🧺'], 3: ['Leather', '👞'], 4: ['Fruit', '🍎'], 5: ['Wood', '🌲'],
+              6: ['Iron', '🗜'], 7: ['Wool', '🧤'], 8: ['Bronze', '🥉'], 9: ['Pottery', '🏺'], 10: ['Tin', '🥫'],
+              11: ['Steel', '🍴'], 12: ['Silk', '👘'], 13: ['Lace', '🧶'], 14: ['Ivory', '🐘'], 15: ['Crystal', '🔮'],
+              20: ['Porcelain', '🚽'], 25: ['Silver', '🥈'], 30: ['Pearl', '⚪️'], 35: ['Coral', '🐠'],
+              40: ['Ruby', '♦️'], 45: ['Sapphire', '🔹'], 50: ['Gold', '🥇'], 55: ['Emerald', '🟩'],
+              60: ['Yellow Diamond', '✨'], 65: ['Blue Sapphire', '🔷'], 70: ['Platinum', '💳'], 75: ['Diamond', '💎'],
+              80: ['Oak', '🌳'], 85: ['Moonstone', '🌛'], 90: ['Granite', '🌑']}
+    if level % 100 == 0:
+        just_attained = True
+        status = 'Hundred'
+        emoji = (level // 100) * '💯'
+    else:
+        value = level % 100
+        just_attained = value in emojis
+        while value not in emojis:
+            value -= 1
+        status = emojis[value][0]
+        emoji = ((level // 100) * '💯') + emojis[value][1]
+    if level > 100:
+        status += ' ' + (((level + 1) // 100) * 'I')
+    return [status, emoji, just_attained]
+
+
 def main():
     """Start the bot."""
     # Create the Updater and pass it your bot's token.
@@ -582,7 +613,6 @@ def main():
     dp.add_handler(CommandHandler("averages", averages))
     dp.add_handler(CommandHandler("debugtime", debugtime))
     dp.add_handler(CommandHandler("best", minTimes))
-    dp.add_handler(MessageHandler(Filters.sticker, sticker_id))
     # on noncommand i.e message - echo the message on Telegram
     # log all errors
     dp.add_error_handler(error)
