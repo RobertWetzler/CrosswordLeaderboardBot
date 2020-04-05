@@ -174,6 +174,13 @@ def averages(update, context):
 def addtime_msg(update, context):
     name = str(update.message.from_user.first_name)
     value = (update.message.text.partition(':'))
+    user_id = update.message.from_user.id
+    if 'ids' not in context.chat_data:
+        context.chat_data['ids'] = dict()
+    if user_id not in context.chat_data['ids'].keys():
+        context.chat_data['ids'][user_id] = dict()
+        context.chat_data['ids'][user_id]['Remind'] = True
+    context.chat_data['ids'][user_id]['Received'] = True
     if len(value[2]) != 0 & value[0].isdigit() & value[2].isdigit():
         first = value[0]
         if len(first) == 0:
@@ -367,6 +374,9 @@ def dailytimes_job(context):
             context.bot.send_message(chatID, mg)
             for name in globalChatData[chatID]['overall']:
                 globalChatData[chatID]['overall'][name].append(None)
+            if 'ids' in globalChatData[chatID]:
+                for user_id in globalChatData[chatID]['ids']:
+                    globalChatData[chatID]['ids'][user_id]['Received'] = False
             tz = timezone('EST')
             tomorrow = datetime.now(tz) + timedelta(days=1)
             globalChatData[chatID]['overallDates'].append(f'{tomorrow.month}/{tomorrow.day}/{tomorrow.year}')
@@ -580,9 +590,44 @@ def emoji_status(level):
         status += ' ' + (((level // 100) + 1) * 'I')
     return [status, emoji, just_attained]
 
+
 def dm_test(update, context):
-    id = update.message.from_user.id
-    context.bot.send_message(id, 'Hey cutie')
+    user_id = update.message.from_user.id
+    context.bot.send_message(user_id, 'Hey cutie')
+
+
+def remind(context):
+    for chatID in globalChatData:
+        if 'ids' in globalChatData[chatID]:
+            for user_id in globalChatData[chatID]['ids']:
+                if not globalChatData[chatID]['ids'][user_id]['Received'] and globalChatData['ids'][user_id]['Remind']:
+                    context.bot.send_message(user_id, "Reminder: You have one hour to submit your crossword time! Use "
+                                                      "/stop_reminders to stop getting this reminder.")
+
+
+def stop_reminders(update, context):
+    global globalChatData
+    user_id = update.message.from_user.id
+    for chatID in globalChatData:
+        if 'ids' in globalChatData[chatID] and user_id in globalChatData[chatID]['ids']:
+            if globalChatData[chatID]['ids'][user_id]['Remind']:
+                globalChatData[chatID]['ids'][user_id]['Remind'] = False
+                context.bot.send_message(user_id, 'Stopping reminders. Use /send_reminders if you change your mind.')
+            else:
+                context.bot.send_message(user_id, 'Reminders are already inactive!')
+
+
+def send_reminders(update, context):
+    global globalChatData
+    user_id = update.message.from_user.id
+    for chatID in globalChatData:
+        if 'ids' in globalChatData[chatID] and user_id in globalChatData[chatID]['ids']:
+            if not globalChatData[chatID]['ids'][user_id]['Remind']:
+                globalChatData[chatID]['ids'][user_id]['Remind'] = True
+                context.bot.send_message(user_id, 'Now sending reminders.')
+            else:
+                context.bot.send_message(user_id, 'Reminders are already active!')
+
 
 def main():
     """Start the bot."""
@@ -617,6 +662,8 @@ def main():
     dp.add_handler(CommandHandler("debugtime", debugtime))
     dp.add_handler(CommandHandler("best", minTimes))
     dp.add_handler(CommandHandler("dm_me", dm_test))
+    dp.add_handler(CommandHandler("stop_reminders", stop_reminders))
+    dp.add_handler(CommandHandler("send_reminders", send_reminders))
     # on noncommand i.e message - echo the message on Telegram
     # log all errors
     dp.add_error_handler(error)
@@ -627,12 +674,16 @@ def main():
     sixDays = (5, 6)
     # EST: 10 PM. UTC: 3 AM.
     t10 = time(2, 0, 0, 0)
+    t9 = time(1, 0, 0, 0)
     # EST: 6 PM. UTC: 11 PM.
     t6 = time(22, 0, 0, 0)
+    t5 = time(21, 0, 0, 0)
     # Job at 10 PM EST Mon - Fri
     ten_pm_days = j.run_daily(dailytimes_job, t10, tenDays)
+    remind_9_pm = j.run_daily(remind, t9, tenDays)
     # Job at 6 PM EST Sat & Sun
     six_pm_days = j.run_daily(dailytimes_job, t6, sixDays)
+    remind_9_pm = j.run_daily(remind, t5, sixDays)
     # repeat = j.run_repeating(sendJob, interval=5, first = 0)
     # Start the Bot
     # j.start()
