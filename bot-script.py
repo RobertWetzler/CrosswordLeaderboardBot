@@ -580,6 +580,9 @@ def emoji_status(level):
         status += ' ' + (((level // 100) + 1) * 'I')
     return [status, emoji, just_attained]
 
+def dm_test(update, context):
+    id = update.message.from_user.id
+    context.bot.send_message(id, 'Hey cutie')
 
 def main():
     """Start the bot."""
@@ -613,6 +616,7 @@ def main():
     dp.add_handler(CommandHandler("averages", averages))
     dp.add_handler(CommandHandler("debugtime", debugtime))
     dp.add_handler(CommandHandler("best", minTimes))
+    dp.add_handler(CommandHandler("dm_me", dm_test))
     # on noncommand i.e message - echo the message on Telegram
     # log all errors
     dp.add_error_handler(error)
