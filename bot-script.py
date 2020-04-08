@@ -187,9 +187,7 @@ def addtime_msg(update, context):
             first = "0"
         second = value[2]
         total = 60 * int(first) + int(second)
-        # Compare to min time for today and overall
-        tz = timezone('EST')
-        today = datetime.now(tz)
+        # Compare to min time for today and overall=
         if name == 'Max' and total == 26:
             update.message.reply_sticker(sticker=
                                          'CAACAgEAAxkBAAICJ15pj6hc7Nr4zNyJQT7camZOEgPUAAKGAAOkJocMxc_x7wE2OzwYBA')
@@ -208,6 +206,7 @@ def addtime_msg(update, context):
                     if current_time is not None and current_time < min_time:
                         min_time = current_time
                 context.chat_data['minTimes'][name]['overall'] = min_time
+        # *** Min Times Region ***
         days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
         today = context.chat_data['overallDates'][-1].split('/')
         day_index = datetime(int(today[2]), int(today[0]), int(today[1])).weekday()
@@ -333,14 +332,29 @@ def dailytimes_job(context):
                 mg += "and " + rank[0][len(rank[0]) - 1] + " won!"
             context.bot.send_message(chatID, mg)
             win_statuses = []
+            if 'streaks' not in globalChatData[chatID]:
+                globalChatData[chatID]['streaks'] = dict()
+            if 'best_streak' not in globalChatData[chatID]:
+                globalChatData[chatID]['best_streak'] = 0
+            for name in globalChatData[chatID]['streaks'].keys():
+                if name not in rank[0]:
+                    if globalChatData[chatID]['streaks'][name] > globalChatData[chatID]['max_streak']:
+                        globalChatData[chatID]['best_streak'] = globalChatData[chatID]['streaks'][name]
+                        context.bot.send_message(chatID, f'{name} ended the best streak on record - '
+                                                         f'{globalChatData[chatID]["streaks"][name]} days!')
+                    del globalChatData[chatID]['streaks'][name]
             for name in rank[0]:
-                if not (name in globalChatData[chatID]['leaderboard']):
+                if name not in globalChatData[chatID]['leaderboard']:
                     globalChatData[chatID]['leaderboard'][name] = 1
                 else:
                     globalChatData[chatID]['leaderboard'][name] += 1
                 status = emoji_status(globalChatData[chatID]['leaderboard'][name])
                 if status[2]:
                     win_statuses.append(f'{name} attained {status[0]} status!')
+                if name in globalChatData[chatID]['streaks']:
+                    globalChatData['streaks'][name] += 1
+                else:
+                    globalChatData['streaks'][name] = 1
             total_rank = []
             for name in globalChatData[chatID]['leaderboard']:
                 if len(total_rank) == 0:
@@ -362,13 +376,18 @@ def dailytimes_job(context):
                     if not inserted:
                         total_rank.append([name])
             mg = "Overall Standings:"
+            sup = str.maketrans('0123456789', '⁰¹²³⁴⁵⁶⁷⁸⁹')
+            x = 'ˣ'
             for i in range(len(total_rank)):
                 for j in range(len(total_rank[i])):
                     name = total_rank[i][j]
                     place = i + 1
-                    mg += "\n" + str(place) + " " + name + " - " + str(
+                    streak = ''
+                    if name in context.chat_data['streaks']:
+                        streak = str(context.chat_data['streaks'][name] + 1).translate(sup)
+                    mg += "\n" + str(place) + " " + name + streak + " - " + str(
                         globalChatData[chatID]['leaderboard'][name]) + " " + \
-                        emoji_status(globalChatData[chatID]['leaderboard'][name])[1]
+                          emoji_status(globalChatData[chatID]['leaderboard'][name])[1]
             for win_status in win_statuses:
                 mg += "\n" + win_status
             context.bot.send_message(chatID, mg)
@@ -406,9 +425,11 @@ def currentstandings(update, context):
             if not inserted:
                 rank.append([name])
     if len(rank) == 0:
-        update.message.reply_text("No recorded times found for today")
+        update.message.reply_text('No recorded times found for today')
     else:
         mg = "Today's Rankings: "
+        sup = str.maketrans('0123456789', '⁰¹²³⁴⁵⁶⁷⁸⁹')
+        x = 'ˣ'
         for i in range(len(rank)):
             time = dailyTimes[rank[i][0]]
             seconds = "" + str(time % 60)
@@ -416,7 +437,15 @@ def currentstandings(update, context):
                 seconds = "0" + seconds
             place = i + 1
             for name in rank[i]:
-                mg = mg + "\n<b>" + str(place) + "</b> " + name + " - " + str(int(time / 60)) + ":" + seconds + " "
+                streak = ''
+                if 'streaks' in context.chat_data and name in context.chat_data['streaks']:
+                    if place == 1:
+                        streak = str(context.chat_data['streaks'][name]+1).translate(sup)
+                    elif context.chat_data['streaks'][name] > 1:
+                        streak = str(context.chat_data['streaks'][name]+1).translate(sup)
+                        streak = x + streak
+                mg = mg + "\n<b>" + str(place) + "</b> " + name + streak + " - " + str(int(time / 60)) + ":" + \
+                    seconds + " "
         if len(context.chat_data['daily']) == 1 or not ('pinnedStandings' in context.chat_data):
             context.chat_data['pinnedStandings'] = context.bot.send_message(update.message.chat_id, mg,
                                                                             parse_mode=ParseMode.HTML)
@@ -452,6 +481,8 @@ def currentstandings_manual(update, context):
         update.message.reply_text("No recorded times found for today")
     else:
         mg = "Today's Rankings: "
+        sup = str.maketrans('0123456789', '⁰¹²³⁴⁵⁶⁷⁸⁹')
+        x = 'ˣ'
         for i in range(len(rank)):
             time = dailyTimes[rank[i][0]]
             seconds = "" + str(time % 60)
@@ -459,7 +490,14 @@ def currentstandings_manual(update, context):
                 seconds = "0" + seconds
             place = i + 1
             for name in rank[i]:
-                mg = mg + "\n" + str(place) + " " + name + " - " + str(int(time / 60)) + ":" + seconds + " "
+                streak = ''
+                if 'streaks' in context.chat_data and name in context.chat_data['streaks']:
+                    if place == 1:
+                        streak = str(context.chat_data['streaks'][name] + 1).translate(sup)
+                    elif context.chat_data['streaks'][name] > 1:
+                        streak = str(context.chat_data['streaks'][name] + 1).translate(sup)
+                        streak = x + streak
+                mg = mg + "\n" + str(place) + " " + name + streak + " - " + str(int(time / 60)) + ":" + seconds + " "
         update.message.reply_text(mg, parse_mode=ParseMode.HTML)
 
 
