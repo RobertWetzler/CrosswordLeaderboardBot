@@ -384,7 +384,7 @@ def dailytimes_job(context):
                     place = i + 1
                     streak = ''
                     if name in context.chat_data['streaks']:
-                        streak = str(context.chat_data['streaks'][name] + 1).translate(sup)
+                        streak = str(context.chat_data['streaks'][name]).translate(sup)
                     mg += "\n" + str(place) + " " + name + streak + " - " + str(
                         globalChatData[chatID]['leaderboard'][name]) + " " + \
                           emoji_status(globalChatData[chatID]['leaderboard'][name])[1]
