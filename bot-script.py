@@ -352,9 +352,9 @@ def dailytimes_job(context):
                 if status[2]:
                     win_statuses.append(f'{name} attained {status[0]} status!')
                 if name in globalChatData[chatID]['streaks']:
-                    globalChatData['streaks'][name] += 1
+                    globalChatData[chatID]['streaks'][name] += 1
                 else:
-                    globalChatData['streaks'][name] = 1
+                    globalChatData[chatID]['streaks'][name] = 1
             total_rank = []
             for name in globalChatData[chatID]['leaderboard']:
                 if len(total_rank) == 0:
@@ -367,8 +367,8 @@ def dailytimes_job(context):
                                 globalChatData[chatID]['leaderboard'][total_rank[i][0]]:
                             total_rank.insert(i, [name])
                             inserted = True
-                        elif globalChatData[chatID]['leaderboard'][name] == globalChatData[chatID]['leaderboard'][
-                            total_rank[i][0]]:
+                        elif globalChatData[chatID]['leaderboard'][name] == \
+                                globalChatData[chatID]['leaderboard'][total_rank[i][0]]:
                             total_rank[i].append(name)
                             inserted = True
                         else:
@@ -383,8 +383,8 @@ def dailytimes_job(context):
                     name = total_rank[i][j]
                     place = i + 1
                     streak = ''
-                    if name in context.chat_data['streaks']:
-                        streak = str(context.chat_data['streaks'][name]).translate(sup)
+                    if name in globalChatData[chatID]['streaks']:
+                        streak = str(globalChatData[chatID]['streaks'][name]).translate(sup)
                     mg += "\n" + str(place) + " " + name + streak + " - " + str(
                         globalChatData[chatID]['leaderboard'][name]) + " " + \
                           emoji_status(globalChatData[chatID]['leaderboard'][name])[1]
