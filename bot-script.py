@@ -442,7 +442,7 @@ def currentstandings(update, context):
                     if place == 1:
                         streak = str(context.chat_data['streaks'][name]+1).translate(sup)
                     elif context.chat_data['streaks'][name] > 1:
-                        streak = str(context.chat_data['streaks'][name]+1).translate(sup)
+                        streak = str(context.chat_data['streaks'][name]).translate(sup)
                         streak = x + streak
                 mg = mg + "\n<b>" + str(place) + "</b> " + name + streak + " - " + str(int(time / 60)) + ":" + \
                     seconds + " "
