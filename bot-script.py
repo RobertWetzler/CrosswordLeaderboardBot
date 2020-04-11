@@ -338,7 +338,7 @@ def dailytimes_job(context):
                 globalChatData[chatID]['best_streak'] = 0
             for name in globalChatData[chatID]['streaks'].keys():
                 if name not in rank[0]:
-                    if globalChatData[chatID]['streaks'][name] > globalChatData[chatID]['max_streak']:
+                    if globalChatData[chatID]['streaks'][name] > globalChatData[chatID]['best_streak']:
                         globalChatData[chatID]['best_streak'] = globalChatData[chatID]['streaks'][name]
                         context.bot.send_message(chatID, f'{name} ended the best streak on record - '
                                                          f'{globalChatData[chatID]["streaks"][name]} days!')
