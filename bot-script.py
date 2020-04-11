@@ -383,7 +383,7 @@ def dailytimes_job(context):
                     name = total_rank[i][j]
                     place = i + 1
                     streak = ''
-                    if name in globalChatData[chatID]['streaks']:
+                    if name in globalChatData[chatID]['streaks'] and globalChatData[chatID]['streaks']['name'] > 1:
                         streak = str(globalChatData[chatID]['streaks'][name]).translate(sup)
                     mg += "\n" + str(place) + " " + name + streak + " - " + str(
                         globalChatData[chatID]['leaderboard'][name]) + " " + \
