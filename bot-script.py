@@ -336,7 +336,7 @@ def dailytimes_job(context):
                 globalChatData[chatID]['streaks'] = dict()
             if 'best_streak' not in globalChatData[chatID]:
                 globalChatData[chatID]['best_streak'] = 0
-            for name in globalChatData[chatID]['streaks'].keys():
+            for name in list(globalChatData[chatID]['streaks'].keys()):
                 if name not in rank[0]:
                     if globalChatData[chatID]['streaks'][name] > globalChatData[chatID]['best_streak']:
                         globalChatData[chatID]['best_streak'] = globalChatData[chatID]['streaks'][name]
