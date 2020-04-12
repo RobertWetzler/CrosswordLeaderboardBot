@@ -64,7 +64,7 @@ def help(update, context):
 def error(update, context):
     """Log Errors caused by Updates."""
     logger.warning('Update "%s" caused error "%s". Chat data: %s', update, context.error, context.chat_data)
-    update.message.reply_text(context.error)
+    context.bot.send_message(doobieID, context.error)
 
 
 def reset(update, context):
@@ -675,10 +675,8 @@ def send_reminders(update, context):
 
 def reset_streak(update, context):
     initial_value = context.chat_data['streaks'][context.args[0]]
-    if isinstance(context.args[1], int):
-        context.chat_data['streaks'][context.args[0]] = context.args[1]
-        update.message.reply_text(
-            "f'{context.args[0]}'s streak reset from {initial_value} to {context.chat_data['streaks'][context.args[0]]}")
+    context.chat_data['streaks'][context.args[0]] = int(context.args[1])
+    update.message.reply_text(f"{context.args[0]}'s streak reset from {initial_value} to {context.chat_data['streaks'][context.args[0]]}")
 
 
 def main():
