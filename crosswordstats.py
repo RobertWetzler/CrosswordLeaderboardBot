@@ -6,11 +6,17 @@ import time
 import datetime as dt
 import pandas as pd
 
-def lineplot(overall_dict, dates, filename, ylim=None):
+def lineplot(overall_dict, date_list, filename, ylim=None, daysBack=None):
     fig, ax = plt.subplots()
+    dates = list(date_list)
+    if daysBack:
+        dates = dates[-daysBack:]
     x = [dt.datetime.strptime(d, '%m/%d/%Y').date() for d in dates]
     for name in overall_dict:
-        plt.plot(x, overall_dict[name], 'o-', label=name, ms=3)
+        times = list(overall_dict[name])
+        if daysBack:
+            times = overall_dict[name][-daysBack:]
+        plt.plot(x, times, 'o-', label=name, ms=3)
     plt.gcf().autofmt_xdate()
     formatter = matplotlib.ticker.FuncFormatter(lambda s, y: time.strftime('%M:%S', time.gmtime(s)))
     ax.yaxis.set_major_formatter(formatter)
