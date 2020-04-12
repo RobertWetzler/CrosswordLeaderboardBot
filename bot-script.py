@@ -146,11 +146,16 @@ def testVar(update, context):
 
 
 def stats(update, context):
-    topStr = update.message.text.partition(' ')[2]
+    topStr = context.args[0]
+    daysBack = context.args[1]
     top = None
     if len(topStr) > 0:
         top = int(topStr)
-    lineplot(context.chat_data['overall'], context.chat_data['overallDates'], 'overallLinePlot.png', ylim=top)
+    if len(daysBack) > 0:
+        daysBack = int(daysBack)
+    else:
+        daysBack = None
+    lineplot(context.chat_data['overall'], context.chat_data['overallDates'], 'overallLinePlot.png', ylim=top, daysBack=daysBack)
     context.bot.send_photo(chat_id=update.message.chat_id, photo=open('overallLinePlot.png', 'rb'))
     os.remove('overallLinePlot.png')
 
@@ -440,12 +445,12 @@ def currentstandings(update, context):
                 streak = ''
                 if 'streaks' in context.chat_data and name in context.chat_data['streaks']:
                     if place == 1:
-                        streak = str(context.chat_data['streaks'][name]+1).translate(sup)
+                        streak = str(context.chat_data['streaks'][name] + 1).translate(sup)
                     elif context.chat_data['streaks'][name] > 1:
                         streak = str(context.chat_data['streaks'][name]).translate(sup)
                         streak = x + streak
                 mg = mg + "\n<b>" + str(place) + "</b> " + name + streak + " - " + str(int(time / 60)) + ":" + \
-                    seconds + " "
+                     seconds + " "
         if len(context.chat_data['daily']) == 1 or not ('pinnedStandings' in context.chat_data):
             context.chat_data['pinnedStandings'] = context.bot.send_message(update.message.chat_id, mg,
                                                                             parse_mode=ParseMode.HTML)
@@ -547,6 +552,7 @@ def leaderboard(update, context):
             mg += "s"
         mg += ". "
     audio = gTTS(text=mg, lang='en', slow=False)
+    gTTS()
     audio.save("leaderboard.ogg")
     context.bot.send_voice(chat_id=doobieID, voice=open('leaderboard.ogg', 'rb'))
     os.remove("leaderboard.ogg")
@@ -667,6 +673,14 @@ def send_reminders(update, context):
                 context.bot.send_message(user_id, 'Reminders are already active!')
 
 
+def reset_streak(update, context):
+    initial_value = context.chat_data['streaks'][context.args[0]]
+    if isinstance(context.args[1], int):
+        context.chat_data['streaks'][context.args[0]] = context.args[1]
+        update.message.reply_text(
+            "f'{context.args[0]}'s streak reset from {initial_value} to {context.chat_data['streaks'][context.args[0]]}")
+
+
 def main():
     """Start the bot."""
     # Create the Updater and pass it your bot's token.
@@ -702,6 +716,7 @@ def main():
     dp.add_handler(CommandHandler("dm_me", dm_test))
     dp.add_handler(CommandHandler("stop_reminders", stop_reminders))
     dp.add_handler(CommandHandler("send_reminders", send_reminders))
+    dp.add_handler(CommandHandler("reset_streak", reset_streak))
     # on noncommand i.e message - echo the message on Telegram
     # log all errors
     dp.add_error_handler(error)
