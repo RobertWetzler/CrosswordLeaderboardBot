@@ -26,7 +26,7 @@ import copy
 from telegram import ParseMode, Sticker
 from gtts import gTTS
 from datetime import datetime, time, timedelta
-from crosswordstats import lineplot, avgtimes, lineplot_best
+from crosswordstats import lineplot, avgtimes, lineplot_best, lineplot_best_fit
 import os
 
 # Enable logging
@@ -169,6 +169,12 @@ def stats_best(update, context):
     context.bot.send_photo(chat_id=update.message.chat_id, photo=open('overallLinePlot.png', 'rb'))
     os.remove('overallLinePlot.png')
 
+def stats_best_fit(update, context):
+    name = context.args[0]
+    degree = context.args[1]
+    lineplot_best_fit(context.chat_data['overall'], context.chat_data['overallDates'], 'bestFitPlot.png', name, int(degree))
+    context.bot.send_photo(chat_id=update.message.chat_id, photo=open('bestFitPlot.png', 'rb'))
+    os.remove('bestFitPlot.png')
 
 def averages(update, context):
     avgtimes(context.chat_data['overall'], context.chat_data['overallDates'], 'avgBars.png')
