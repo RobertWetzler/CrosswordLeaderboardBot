@@ -721,6 +721,7 @@ def main():
     dp.add_handler(CommandHandler("stop_reminders", stop_reminders))
     dp.add_handler(CommandHandler("send_reminders", send_reminders))
     dp.add_handler(CommandHandler("reset_streak", reset_streak))
+    dp.add_handler(CommandHandler("stats_best_fit", stats_best_fit))
     # on noncommand i.e message - echo the message on Telegram
     # log all errors
     dp.add_error_handler(error)
