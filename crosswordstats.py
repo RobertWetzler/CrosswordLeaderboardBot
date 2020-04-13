@@ -5,6 +5,7 @@ from matplotlib.dates import DateFormatter
 import time
 import datetime as dt
 import pandas as pd
+import numpy as np
 
 def lineplot(overall_dict, date_list, filename, ylim=None, daysBack=None):
     fig, ax = plt.subplots()
@@ -29,6 +30,29 @@ def lineplot(overall_dict, date_list, filename, ylim=None, daysBack=None):
     if ylim is not None:
         plt.ylim(top=ylim)
     plt.savefig(filename, dpi=500)
+
+def lineplot_best_fit(overall_dict, date_list, filename, name, degree):
+    fig, ax = plt.subplots()
+    dates = list(date_list)
+    x = [dt.datetime.strptime(d, '%m/%d/%Y').date() for d in dates]
+    times = list(overall_dict[name])
+    dates_indices = list()
+    for i in range(len(times)):
+        if times[i]:
+            dates_indices.append(i)
+    coef = np.polyfit(dates_indices, times, degree)
+    best_fit_fn = np.poly1d(coef)
+    plt.plot(x, times, 'o', x, best_fit_fn(dates_indices),  ms=3)
+    plt.gcf().autofmt_xdate()
+    formatter = matplotlib.ticker.FuncFormatter(lambda s, y: time.strftime('%M:%S', time.gmtime(s)))
+    ax.yaxis.set_major_formatter(formatter)
+    ax.xaxis.set_major_locator(mdates.AutoDateLocator())
+    ax.xaxis.set_major_formatter(DateFormatter("%m-%d"))
+    plt.title(f"Best Fit Curve for {name} of Degree {degree}")
+    plt.xlabel('Day')
+    plt.ylabel('Time')
+    plt.savefig(filename, dpi=500)
+
 
 def lineplot_best(overall_dict, dates, filename, ylim=None):
     fig, ax = plt.subplots()
