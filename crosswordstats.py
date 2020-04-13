@@ -40,7 +40,7 @@ def lineplot_best_fit(overall_dict, date_list, filename, name, degree):
     for i in range(len(times)):
         if times[i]:
             dates_indices.append(i)
-    coef = np.polyfit(dates_indices, times, degree)
+    coef = np.polyfit(dates_indices, [times[i] for i in dates_indices], degree)
     best_fit_fn = np.poly1d(coef)
     plt.plot(x, times, 'o', [x[i] for i in dates_indices], best_fit_fn(dates_indices),  ms=3)
     plt.gcf().autofmt_xdate()

@@ -165,7 +165,7 @@ def stats_best(update, context):
     top = None
     if len(topStr) > 0:
         top = int(topStr)
-    lineplot_best_fit(context.chat_data['overall'], context.chat_data['overallDates'], 'overallLinePlot.png', ylim=top)
+    lineplot_best(context.chat_data['overall'], context.chat_data['overallDates'], 'overallLinePlot.png', ylim=top)
     context.bot.send_photo(chat_id=update.message.chat_id, photo=open('overallLinePlot.png', 'rb'))
     os.remove('overallLinePlot.png')
 
