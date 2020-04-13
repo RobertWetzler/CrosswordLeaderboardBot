@@ -42,7 +42,7 @@ def lineplot_best_fit(overall_dict, date_list, filename, name, degree):
             dates_indices.append(i)
     coef = np.polyfit(dates_indices, times, degree)
     best_fit_fn = np.poly1d(coef)
-    plt.plot(x, times, 'o', x, best_fit_fn(dates_indices),  ms=3)
+    plt.plot(x, times, 'o', [x[i] for i in dates_indices], best_fit_fn(dates_indices),  ms=3)
     plt.gcf().autofmt_xdate()
     formatter = matplotlib.ticker.FuncFormatter(lambda s, y: time.strftime('%M:%S', time.gmtime(s)))
     ax.yaxis.set_major_formatter(formatter)
