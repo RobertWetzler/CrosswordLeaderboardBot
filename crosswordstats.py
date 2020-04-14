@@ -55,10 +55,44 @@ def lineplot_best_fit(overall_dict, date_list, filename, name, degree):
     plt.savefig(filename, dpi=500)
 
 
+def lineplot_best_fit_week(overall_dict, date_list, filename, name, degree):
+    fig, ax = plt.subplots()
+    dates = list(date_list)
+    day_times = dict()
+    day_indices = dict()
+    weekdays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+    x = [dt.datetime.strptime(d, '%m/%d/%Y').date() for d in dates]
+    times = list(overall_dict[name])
+    for day_index in range(len(times)):
+        day_list = dates[day_index].split('/')
+        day_num = dt.datetime(int(day_list[2]), int(day_list[0]), int(day_list[1])).weekday()
+        if times[day_index]:
+            if weekdays[day_num] not in day_times:
+                day_times[weekdays[day_num]] = list()
+            if weekdays[day_num] not in day_indices:
+                day_indices[weekdays[day_num]] = list()
+            day_times[weekdays[day_num]].append(times[day_index])
+            day_indices[weekdays[day_num]].append(day_index)
+    for weekday in weekdays:
+        if weekday in day_times:
+            coef = np.polyfit(day_indices[weekday], day_times[weekday], degree)
+            best_fit_fn = np.poly1d(coef)
+            plt.plot([x[i] for i in day_indices[weekday]], best_fit_fn(day_indices[weekday]), label=weekday,  ms=3)
+    plt.plot(x, times, 'o', ms=3)
+    plt.gcf().autofmt_xdate()
+    formatter = matplotlib.ticker.FuncFormatter(lambda s, y: time.strftime('%M:%S', time.gmtime(s)))
+    ax.yaxis.set_major_formatter(formatter)
+    ax.xaxis.set_major_locator(mdates.AutoDateLocator())
+    ax.xaxis.set_major_formatter(DateFormatter("%m-%d"))
+    plt.title(f"Best Fit Curve by Day for {name} of Degree {degree}")
+    plt.legend()
+    plt.xlabel('Day')
+    plt.ylabel('Time')
+    plt.savefig(filename, dpi=500)
+
 def lineplot_best(overall_dict, dates, filename, ylim=None):
     fig, ax = plt.subplots()
     x = [dt.datetime.strptime(d, '%m/%d/%Y').date() for d in dates]
-    
     x_non = []
     x_sat = []
     best_non = []
@@ -97,7 +131,7 @@ def avgtimes(overall_dict, dates, filename):
             day_list = dates[day_index].split('/')
             day = (dt.datetime(int(day_list[2]), int(day_list[0]), int(day_list[1])).weekday() + 1) % 7
             if overall_dict[name][day_index] is not None:
-                week_avgs[name]['avgs'][day] += overall_dict[name][day_index] + 1
+                week_avgs[name]['avgs'][day] += overall_dict[name][day_index]
                 week_avgs[name]['counts'][day] += 1
         for weekday in range(len(week_avgs[name]['avgs'])):
             if week_avgs[name]['counts'][weekday] != 0:
@@ -110,7 +144,6 @@ def avgtimes(overall_dict, dates, filename):
     fig, ax = plt.subplots()
     for name in week_avgs:
         everyone.append(week_avgs[name]['avgs'])
-    list_of_lists = list(list())
     df = pd.DataFrame(everyone, columns=labels)
     formatter = matplotlib.ticker.FuncFormatter(lambda s, y: time.strftime('%M:%S', time.gmtime(s)))
     ax.yaxis.set_major_formatter(formatter)
