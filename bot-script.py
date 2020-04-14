@@ -26,7 +26,7 @@ import copy
 from telegram import ParseMode, Sticker
 from gtts import gTTS
 from datetime import datetime, time, timedelta
-from crosswordstats import lineplot, avgtimes, lineplot_best, lineplot_best_fit, calendar_plot
+from crosswordstats import lineplot, avgtimes, lineplot_best, lineplot_best_fit, calendar_plot, lineplot_best_fit_week
 import os
 
 # Enable logging
@@ -155,7 +155,8 @@ def stats(update, context):
         daysBack = int(daysBack)
     else:
         daysBack = None
-    lineplot(context.chat_data['overall'], context.chat_data['overallDates'], 'overallLinePlot.png', ylim=top, daysBack=daysBack)
+    lineplot(context.chat_data['overall'], context.chat_data['overallDates'], 'overallLinePlot.png', ylim=top,
+             daysBack=daysBack)
     context.bot.send_photo(chat_id=update.message.chat_id, photo=open('overallLinePlot.png', 'rb'))
     os.remove('overallLinePlot.png')
 
@@ -169,12 +170,24 @@ def stats_best(update, context):
     context.bot.send_photo(chat_id=update.message.chat_id, photo=open('overallLinePlot.png', 'rb'))
     os.remove('overallLinePlot.png')
 
+
 def stats_best_fit(update, context):
     name = context.args[0]
     degree = context.args[1]
-    lineplot_best_fit(context.chat_data['overall'], context.chat_data['overallDates'], 'bestFitPlot.png', name, int(degree))
+    lineplot_best_fit(context.chat_data['overall'], context.chat_data['overallDates'], 'bestFitPlot.png', name,
+                      int(degree))
     context.bot.send_photo(chat_id=update.message.chat_id, photo=open('bestFitPlot.png', 'rb'))
     os.remove('bestFitPlot.png')
+
+
+def week_best_fit(update, context):
+    name = context.args[0]
+    degree = context.args[1]
+    lineplot_best_fit_week(context.chat_data['overall'], context.chat_data['overallDates'], 'bestFitPlotWeek.png', name,
+                           int(degree))
+    context.bot.send_photo(chat_id=update.message.chat_id, photo=open('bestFitPlotWeek.png', 'rb'))
+    os.remove('bestFitPlotWeek.png')
+
 
 def averages(update, context):
     avgtimes(context.chat_data['overall'], context.chat_data['overallDates'], 'avgBars.png')
@@ -688,7 +701,8 @@ def send_reminders(update, context):
 def reset_streak(update, context):
     initial_value = context.chat_data['streaks'][context.args[0]]
     context.chat_data['streaks'][context.args[0]] = int(context.args[1])
-    update.message.reply_text(f"{context.args[0]}'s streak reset from {initial_value} to {context.chat_data['streaks'][context.args[0]]}")
+    update.message.reply_text(
+        f"{context.args[0]}'s streak reset from {initial_value} to {context.chat_data['streaks'][context.args[0]]}")
 
 
 def main():
@@ -728,6 +742,7 @@ def main():
     dp.add_handler(CommandHandler("send_reminders", send_reminders))
     dp.add_handler(CommandHandler("reset_streak", reset_streak))
     dp.add_handler(CommandHandler("stats_best_fit", stats_best_fit))
+    dp.add_handler(CommandHandler("week_best_fit", week_best_fit))
     dp.add_handler(CommandHandler("calendar", calendar))
     # on noncommand i.e message - echo the message on Telegram
     # log all errors
