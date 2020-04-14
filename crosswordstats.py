@@ -6,6 +6,7 @@ import time
 import datetime as dt
 import pandas as pd
 import numpy as np
+import calmap
 
 def lineplot(overall_dict, date_list, filename, ylim=None, daysBack=None):
     fig, ax = plt.subplots()
@@ -117,4 +118,28 @@ def avgtimes(overall_dict, dates, filename):
     ax.legend([name for name in overall_dict])
     plt.title("Average Crossword Times per Day of the Week")
     plt.gcf().autofmt_xdate()
+    plt.savefig(filename, dpi=500)
+
+def calendar_plot(overall_dict, dates, filename):
+    names = list(overall_dict.keys())
+    weights = [i + 1 for i in range(len(names))]
+    daily_weights = list()
+    for day_index in range(len(dates)):
+        min = 999999
+        weight = None
+        for name in names:
+            if overall_dict[name][day_index]:
+                if overall_dict[name][day_index] < min:
+                    min = overall_dict[name][day_index]
+                    weight = weights[names.index(name)]
+                elif overall_dict[name][day_index] == min:
+                    weight = 0
+        daily_weights.append(weight)
+    datetimes = [dt.datetime(int(date.split('/')[2]),int(date.split('/')[0]), int(date.split('/')[1])) for date in dates]
+    series = pd.Series(data=daily_weights, index=datetimes)
+    cmap = matplotlib.colors.ListedColormap(['grey', 'skyblue', 'navajowhite', 'palegreen', 'lightcoral', 'plum'])
+    fig, ax = calmap.calendarplot(series, fillcolor='silver', cmap=cmap, fig_kws=dict(figsize=(17,8)))
+    labels = ['Tie'] + names
+    formatter = plt.FuncFormatter(lambda val, loc: labels[int(val)])
+    fig.colorbar(ax[0].get_children()[1], ax=ax.ravel().tolist(), shrink=0.4, format=formatter)
     plt.savefig(filename, dpi=500)

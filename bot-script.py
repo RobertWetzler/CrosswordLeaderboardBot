@@ -26,7 +26,7 @@ import copy
 from telegram import ParseMode, Sticker
 from gtts import gTTS
 from datetime import datetime, time, timedelta
-from crosswordstats import lineplot, avgtimes, lineplot_best, lineplot_best_fit
+from crosswordstats import lineplot, avgtimes, lineplot_best, lineplot_best_fit, calendar_plot
 import os
 
 # Enable logging
@@ -180,6 +180,12 @@ def averages(update, context):
     avgtimes(context.chat_data['overall'], context.chat_data['overallDates'], 'avgBars.png')
     context.bot.send_photo(chat_id=update.message.chat_id, photo=open('avgBars.png', 'rb'))
     os.remove('avgBars.png')
+
+
+def calendar(update, context):
+    calendar_plot(context.chat_data['overall'], context.chat_data['overallDates'], 'calendar.png')
+    context.bot.send_photo(chat_id=update.message.chat_id, photo=open('calendar.png', 'rb'))
+    os.remove('calendar.png')
 
 
 def addtime_msg(update, context):
@@ -722,6 +728,7 @@ def main():
     dp.add_handler(CommandHandler("send_reminders", send_reminders))
     dp.add_handler(CommandHandler("reset_streak", reset_streak))
     dp.add_handler(CommandHandler("stats_best_fit", stats_best_fit))
+    dp.add_handler(CommandHandler("calendar", calendar))
     # on noncommand i.e message - echo the message on Telegram
     # log all errors
     dp.add_error_handler(error)
