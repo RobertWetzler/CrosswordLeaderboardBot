@@ -77,7 +77,8 @@ def lineplot_best_fit_week(overall_dict, date_list, filename, name, degree):
         if weekday in day_times:
             coef = np.polyfit(day_indices[weekday], day_times[weekday], degree)
             best_fit_fn = np.poly1d(coef)
-            plt.plot([x[i] for i in day_indices[weekday]], best_fit_fn(day_indices[weekday]), label=weekday,  ms=3)
+            indices = [i for i in range(len(x)) if (day_indices[weekday][0] <= i <= day_indices[weekday][-1])]
+            plt.plot([x[i] for i in indices], best_fit_fn(indices), label=weekday,  ms=3)
     plt.plot(x, times, 'o', ms=3)
     plt.gcf().autofmt_xdate()
     formatter = matplotlib.ticker.FuncFormatter(lambda s, y: time.strftime('%M:%S', time.gmtime(s)))
@@ -86,6 +87,7 @@ def lineplot_best_fit_week(overall_dict, date_list, filename, name, degree):
     ax.xaxis.set_major_formatter(DateFormatter("%m-%d"))
     plt.title(f"Best Fit Curve by Day for {name} of Degree {degree}")
     plt.legend()
+    plt.ylim(top = max([valid_time for valid_time in times if valid_time]) + 10, bottom=0)
     plt.xlabel('Day')
     plt.ylabel('Time')
     plt.savefig(filename, dpi=500)
