@@ -138,8 +138,8 @@ def calendar_plot(overall_dict, dates, filename):
     datetimes = [dt.datetime(int(date.split('/')[2]),int(date.split('/')[0]), int(date.split('/')[1])) for date in dates]
     series = pd.Series(data=daily_weights, index=datetimes)
     cmap = matplotlib.colors.ListedColormap(['grey', 'skyblue', 'navajowhite', 'palegreen', 'lightcoral', 'plum'])
-    fig, ax = calmap.calendarplot(series, fillcolor='silver', cmap=cmap, fig_kws=dict(figsize=(17,8)))
+    fig, ax = calmap.calendarplot(series, fillcolor='silver', cmap=cmap, fig_kws=dict(figsize=(10,4)))
     labels = ['Tie'] + names
     formatter = plt.FuncFormatter(lambda val, loc: labels[int(val)])
     fig.colorbar(ax[0].get_children()[1], ax=ax.ravel().tolist(), shrink=0.4, format=formatter)
-    plt.savefig(filename, dpi=500)
+    plt.savefig(filename)
