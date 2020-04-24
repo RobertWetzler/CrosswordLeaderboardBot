@@ -31,6 +31,7 @@ def lineplot(overall_dict, date_list, filename, ylim=None, daysBack=None):
     if ylim is not None:
         plt.ylim(top=ylim)
     plt.savefig(filename, dpi=500)
+    plt.close('all')
 
 def lineplot_best_fit(overall_dict, date_list, filename, name, degree):
     fig, ax = plt.subplots()
@@ -53,6 +54,7 @@ def lineplot_best_fit(overall_dict, date_list, filename, name, degree):
     plt.xlabel('Day')
     plt.ylabel('Time')
     plt.savefig(filename, dpi=500)
+    plt.close('all')
 
 
 def lineplot_best_fit_week(overall_dict, date_list, filename, name, degree):
@@ -91,6 +93,7 @@ def lineplot_best_fit_week(overall_dict, date_list, filename, name, degree):
     plt.xlabel('Day')
     plt.ylabel('Time')
     plt.savefig(filename, dpi=500)
+    plt.close('all')
 
 def lineplot_best(overall_dict, dates, filename, ylim=None):
     fig, ax = plt.subplots()
@@ -122,6 +125,7 @@ def lineplot_best(overall_dict, dates, filename, ylim=None):
     if ylim is not None:
         plt.ylim(top=ylim)
     plt.savefig(filename, dpi=500)
+    plt.close('all')
 
 def avgtimes(overall_dict, dates, filename):
     week_avgs = dict()
@@ -154,6 +158,7 @@ def avgtimes(overall_dict, dates, filename):
     plt.title("Average Crossword Times per Day of the Week")
     plt.gcf().autofmt_xdate()
     plt.savefig(filename, dpi=500)
+    plt.close('all')
 
 def calendar_plot(overall_dict, dates, filename):
     names = list(overall_dict.keys())
@@ -178,3 +183,4 @@ def calendar_plot(overall_dict, dates, filename):
     formatter = plt.FuncFormatter(lambda val, loc: labels[int(val)])
     fig.colorbar(ax[0].get_children()[1], ax=ax.ravel().tolist(), shrink=0.4, format=formatter)
     plt.savefig(filename)
+    plt.close('all')
