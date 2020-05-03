@@ -383,6 +383,16 @@ def dailytimes_job(context):
                     win_statuses.append(f'{name} attained {status[0]} status!')
                 if name in globalChatData[chatID]['streaks']:
                     globalChatData[chatID]['streaks'][name] += 1
+                    # Check for longest streak, change admin title
+                    if globalChatData[chatID]['streaks'][name] > globalChatData[chatID]['best_streak']:
+                        if 'best_streak_name' not in globalChatData[chatID]:
+                            globalChatData[chatID]['best_streak_name'] = name
+                            admins = context.bot.get_chat_administrators(chatID)
+                            admin_id =  next((admin.user.id for admin in admins if admin.user.first_name == name), None)
+                            if admin_id:
+                                context.bot.set
+                        elif name != globalChatData[chatID]['best_streak_name']:
+
                 else:
                     globalChatData[chatID]['streaks'][name] = 1
             total_rank = []
@@ -669,7 +679,7 @@ def remind(context):
     for chatID in globalChatData:
         if 'ids' in globalChatData[chatID]:
             for user_id in globalChatData[chatID]['ids']:
-                if not globalChatData[chatID]['ids'][user_id]['Received'] and globalChatData['ids'][user_id]['Remind']:
+                if not globalChatData[chatID]['ids'][user_id]['Received'] and globalChatData[chatID]['ids'][user_id]['Remind']:
                     context.bot.send_message(user_id, "Reminder: You have one hour to submit your crossword time! Use "
                                                       "/stop_reminders to stop getting this reminder.")
 
