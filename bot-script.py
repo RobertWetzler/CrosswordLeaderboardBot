@@ -44,16 +44,17 @@ globalChatData = dict()
 # Define a few command handlers. These usually take the two arguments update and
 # context. Error handlers also receive the raised TelegramError object in error.
 def start(update, context):
-    """Send a message when the command /start is issued."""
-    if not ("leaderboard" in context.chat_data):
-        context.chat_data["leaderboard"] = {}
-        context.chat_data["daily"] = {}
-        update.message.reply_text('New leaderboard and daily time started')
-    else:
-        update.message.reply_text('Leaderboard and daily time already defined!')
-    if 'pinnedStandings' in context.chat_data:
-        del context.chat_data['pinnedStandings']
-        update.message.reply_text('Deleted pinned message from data')
+    if update.message.chat_id == doobieID:
+        """Send a message when the command /start is issued."""
+        if not ("leaderboard" in context.chat_data):
+            context.chat_data["leaderboard"] = {}
+            context.chat_data["daily"] = {}
+            update.message.reply_text('New leaderboard and daily time started')
+        else:
+            update.message.reply_text('Leaderboard and daily time already defined!')
+        if 'pinnedStandings' in context.chat_data:
+            del context.chat_data['pinnedStandings']
+            update.message.reply_text('Deleted pinned message from data')
 
 
 def help(update, context):
@@ -68,262 +69,456 @@ def error(update, context):
 
 
 def reset(update, context):
-    mg = update.message.text.partition(' ')[2].partition(' ')
-    name = mg[0]
-    num = mg[2]
-    if not ('leaderboard' in context.chat_data):
-        context.chat_data['leaderboard'] = dict()
-    if int(num) == 0 and name in context.chat_data['leaderboard']:
-        del context.chat_data['leaderboard'][name]
-        update.message.reply_text(name + " deleted from leaderboard")
-    elif int(num) > 0:
-        context.chat_data['leaderboard'][name] = int(num)
-        update.message.reply_text(name + " reset to " + num + " in leaderboard")
+    if update.message.chat_id == doobieID:
+        mg = update.message.text.partition(' ')[2].partition(' ')
+        name = mg[0]
+        num = mg[2]
+        if not ('leaderboard' in context.chat_data):
+            context.chat_data['leaderboard'] = dict()
+        if int(num) == 0 and name in context.chat_data['leaderboard']:
+            del context.chat_data['leaderboard'][name]
+            update.message.reply_text(name + " deleted from leaderboard")
+        elif int(num) > 0:
+            context.chat_data['leaderboard'][name] = int(num)
+            update.message.reply_text(name + " reset to " + num + " in leaderboard")
 
 
 def initoverall(update, context):
-    if 'overall' not in context.chat_data or update.message.text.partition(' ')[2] == 'override':
-        context.chat_data['overall'] = dict()
-        context.chat_data['overall']['Max'] = [30, 559, 24, 70, 39, 26, 16, 30, 15, 33, 65, 22, 29, 38, 43, 16, 23, 29,
-                                               32, 24, 23, 50, 31, 23]
-        context.chat_data['overall']['Macey'] = [None, 34, 40, None, 35, 60, 33, 37, 35, 49, 65, 27, None, 19, 44, 21,
-                                                 48, 48, 30, 33, 25, 38, 36, 56]
-        context.chat_data['overall']['Asher'] = [71, 124, 40, None, 58, 99, 39, None, 33, 32, 85, 24, 40, 30, 39, 40,
-                                                 None, 51, None, 23, 24, 69, 66, 80]
-        context.chat_data['overall']['Robert'] = [192, 101, 36, None, 111, 62, 51, 225, 78, 251, 149, 42, 97, 53, 206,
-                                                  32, 130, 72, 90, 43, 56, 263, 110, 312]
-        context.chat_data['overall']['Levi'] = [None, 238, 180, None, 256, None, None, None, 54, 61, 116, None, 86, 69,
-                                                50, 50, None, None, 102, 36, 35, None, 192, 110]
-        context.chat_data['overallDates'] = list()
-        for i in range(1, 26):
-            context.chat_data['overallDates'].append(f'1/{i}/2020')
-        for name in context.chat_data['overall']:
-            if name not in context.chat_data['daily']:
-                context.chat_data['overall'][name].append(None)
-            else:
-                context.chat_data['overall'][name].append(context.chat_data['daily'][name])
-    else:
-        update.message.reply_text("Overall is already defined. Don't screw things up, doofus!")
+    if update.message.chat_id == doobieID:
+        if 'overall' not in context.chat_data or update.message.text.partition(' ')[2] == 'override':
+            context.chat_data['overall'] = dict()
+            context.chat_data['overall']['Max'] = [30, 559, 24, 70, 39, 26, 16, 30, 15, 33, 65, 22, 29, 38, 43, 16, 23, 29,
+                                                   32, 24, 23, 50, 31, 23]
+            context.chat_data['overall']['Macey'] = [None, 34, 40, None, 35, 60, 33, 37, 35, 49, 65, 27, None, 19, 44, 21,
+                                                     48, 48, 30, 33, 25, 38, 36, 56]
+            context.chat_data['overall']['Asher'] = [71, 124, 40, None, 58, 99, 39, None, 33, 32, 85, 24, 40, 30, 39, 40,
+                                                     None, 51, None, 23, 24, 69, 66, 80]
+            context.chat_data['overall']['Robert'] = [192, 101, 36, None, 111, 62, 51, 225, 78, 251, 149, 42, 97, 53, 206,
+                                                      32, 130, 72, 90, 43, 56, 263, 110, 312]
+            context.chat_data['overall']['Levi'] = [None, 238, 180, None, 256, None, None, None, 54, 61, 116, None, 86, 69,
+                                                    50, 50, None, None, 102, 36, 35, None, 192, 110]
+            context.chat_data['overallDates'] = list()
+            for i in range(1, 26):
+                context.chat_data['overallDates'].append(f'1/{i}/2020')
+            for name in context.chat_data['overall']:
+                if name not in context.chat_data['daily']:
+                    context.chat_data['overall'][name].append(None)
+                else:
+                    context.chat_data['overall'][name].append(context.chat_data['daily'][name])
+        else:
+            update.message.reply_text("Overall is already defined. Don't screw things up, doofus!")
 
 
 def addtime(update, context):
-    key = str(update.message.from_user.first_name)
-    value = (update.message.text.partition(' ')[2]).partition(':')
-    if len(value[2]) == 0:
-        if key == "Max":
-            update.message.reply_text("Wow " + key + " you suck. Banned.")
-            update.message.chat.kick_member(update.message.from_user.id)
-        update.message.reply_text("Try including a time, dumbass.")
-    else:
-        first = value[0]
-        if len(first) == 0:
-            first = "0"
-        second = value[2]
-        total = 60 * int(first) + int(second)
-        duplicate = False
-        if key in context.chat_data['daily']:
-            duplicate = context.chat_data['daily'][key] == total
-        global globalChatData
-        if not update.message.chat_id in globalChatData:
-            globalChatData[update.message.chat_id] = context.chat_data
-        context.chat_data['daily'][key] = total
-        if not (duplicate):
-            currentstandings(update, context)
+    if update.message.chat_id == doobieID:
+        key = str(update.message.from_user.first_name)
+        value = (update.message.text.partition(' ')[2]).partition(':')
+        if len(value[2]) == 0:
+            if key == "Max":
+                update.message.reply_text("Wow " + key + " you suck. Banned.")
+                update.message.chat.kick_member(update.message.from_user.id)
+            update.message.reply_text("Try including a time, dumbass.")
+        else:
+            first = value[0]
+            if len(first) == 0:
+                first = "0"
+            second = value[2]
+            total = 60 * int(first) + int(second)
+            duplicate = False
+            if key in context.chat_data['daily']:
+                duplicate = context.chat_data['daily'][key] == total
+            global globalChatData
+            if not update.message.chat_id in globalChatData:
+                globalChatData[update.message.chat_id] = context.chat_data
+            context.chat_data['daily'][key] = total
+            if not (duplicate):
+                currentstandings(update, context)
 
 
 def debugtime(update, context):
-    msg = update.message.text.split()
-    index = int(msg[1]) - 1
-    for i in range(2, len(msg)):
-        nameTime = msg[i].partition('-')
-        name = nameTime[0]
-        time = int(nameTime[2])
-        context.chat_data['overall'][name].insert(index, time)
+    if update.message.chat_id == doobieID:
+        msg = update.message.text.split()
+        index = int(msg[1]) - 1
+        for i in range(2, len(msg)):
+            nameTime = msg[i].partition('-')
+            name = nameTime[0]
+            time = int(nameTime[2])
+            context.chat_data['overall'][name].insert(index, time)
 
 
 def testVar(update, context):
-    update.message.reply_text(str(globalChatData))
+    if update.message.chat_id == doobieID:
+        update.message.reply_text(str(globalChatData))
 
 
 def stats(update, context):
-    topStr = context.args[0]
-    daysBack = context.args[1]
-    top = None
-    if len(topStr) > 0:
-        top = int(topStr)
-    if len(daysBack) > 0:
-        daysBack = int(daysBack)
-    else:
-        daysBack = None
-    lineplot(context.chat_data['overall'], context.chat_data['overallDates'], 'overallLinePlot.png', ylim=top,
-             daysBack=daysBack)
-    context.bot.send_photo(chat_id=update.message.chat_id, photo=open('overallLinePlot.png', 'rb'))
-    os.remove('overallLinePlot.png')
+    if update.message.chat_id == doobieID:
+        topStr = context.args[0]
+        daysBack = context.args[1]
+        top = None
+        if len(topStr) > 0:
+            top = int(topStr)
+        if len(daysBack) > 0:
+            daysBack = int(daysBack)
+        else:
+            daysBack = None
+        lineplot(context.chat_data['overall'], context.chat_data['overallDates'], 'overallLinePlot.png', ylim=top,
+                 daysBack=daysBack)
+        context.bot.send_photo(chat_id=update.message.chat_id, photo=open('overallLinePlot.png', 'rb'))
+        os.remove('overallLinePlot.png')
 
 
 def stats_best(update, context):
-    topStr = update.message.text.partition(' ')[2]
-    top = None
-    if len(topStr) > 0:
-        top = int(topStr)
-    lineplot_best(context.chat_data['overall'], context.chat_data['overallDates'], 'overallLinePlot.png', ylim=top)
-    context.bot.send_photo(chat_id=update.message.chat_id, photo=open('overallLinePlot.png', 'rb'))
-    os.remove('overallLinePlot.png')
+    if update.message.chat_id == doobieID:
+        topStr = update.message.text.partition(' ')[2]
+        top = None
+        if len(topStr) > 0:
+            top = int(topStr)
+        lineplot_best(context.chat_data['overall'], context.chat_data['overallDates'], 'overallLinePlot.png', ylim=top)
+        context.bot.send_photo(chat_id=update.message.chat_id, photo=open('overallLinePlot.png', 'rb'))
+        os.remove('overallLinePlot.png')
 
 
 def stats_best_fit(update, context):
-    name = context.args[0]
-    degree = context.args[1]
-    lineplot_best_fit(context.chat_data['overall'], context.chat_data['overallDates'], 'bestFitPlot.png', name,
-                      int(degree))
-    context.bot.send_photo(chat_id=update.message.chat_id, photo=open('bestFitPlot.png', 'rb'))
-    os.remove('bestFitPlot.png')
+    if update.message.chat_id == doobieID:
+        name = context.args[0]
+        degree = context.args[1]
+        lineplot_best_fit(context.chat_data['overall'], context.chat_data['overallDates'], 'bestFitPlot.png', name,
+                          int(degree))
+        context.bot.send_photo(chat_id=update.message.chat_id, photo=open('bestFitPlot.png', 'rb'))
+        os.remove('bestFitPlot.png')
 
 
 def week_best_fit(update, context):
-    name = context.args[0]
-    degree = context.args[1]
-    lineplot_best_fit_week(context.chat_data['overall'], context.chat_data['overallDates'], 'bestFitPlotWeek.png', name,
-                           int(degree))
-    context.bot.send_photo(chat_id=update.message.chat_id, photo=open('bestFitPlotWeek.png', 'rb'))
-    os.remove('bestFitPlotWeek.png')
+    if update.message.chat_id == doobieID:
+        name = context.args[0]
+        degree = context.args[1]
+        lineplot_best_fit_week(context.chat_data['overall'], context.chat_data['overallDates'], 'bestFitPlotWeek.png', name,
+                               int(degree))
+        context.bot.send_photo(chat_id=update.message.chat_id, photo=open('bestFitPlotWeek.png', 'rb'))
+        os.remove('bestFitPlotWeek.png')
 
 
 def averages(update, context):
-    avgtimes(context.chat_data['overall'], context.chat_data['overallDates'], 'avgBars.png')
-    context.bot.send_photo(chat_id=update.message.chat_id, photo=open('avgBars.png', 'rb'))
-    os.remove('avgBars.png')
+    if update.message.chat_id == doobieID:
+        avgtimes(context.chat_data['overall'], context.chat_data['overallDates'], 'avgBars.png')
+        context.bot.send_photo(chat_id=update.message.chat_id, photo=open('avgBars.png', 'rb'))
+        os.remove('avgBars.png')
 
 
 def calendar(update, context):
-    calendar_plot(context.chat_data['overall'], context.chat_data['overallDates'], 'calendar.png')
-    context.bot.send_photo(chat_id=update.message.chat_id, photo=open('calendar.png', 'rb'))
-    os.remove('calendar.png')
+    if update.message.chat_id == doobieID:
+        calendar_plot(context.chat_data['overall'], context.chat_data['overallDates'], 'calendar.png')
+        context.bot.send_photo(chat_id=update.message.chat_id, photo=open('calendar.png', 'rb'))
+        os.remove('calendar.png')
 
 
 def addtime_msg(update, context):
-    name = str(update.message.from_user.first_name)
-    value = (update.message.text.partition(':'))
-    user_id = update.message.from_user.id
-    if 'ids' not in context.chat_data:
-        context.chat_data['ids'] = dict()
-    if user_id not in context.chat_data['ids'].keys():
-        context.chat_data['ids'][user_id] = dict()
-        context.chat_data['ids'][user_id]['Remind'] = True
-    context.chat_data['ids'][user_id]['Received'] = True
-    if len(value[2]) != 0 & value[0].isdigit() & value[2].isdigit():
-        first = value[0]
-        if len(first) == 0:
-            first = "0"
-        second = value[2]
-        total = 60 * int(first) + int(second)
-        # Compare to min time for today and overall=
-        if name == 'Max' and total == 26:
-            update.message.reply_sticker(sticker=
-                                         'CAACAgEAAxkBAAICJ15pj6hc7Nr4zNyJQT7camZOEgPUAAKGAAOkJocMxc_x7wE2OzwYBA')
-        if 'minTimes' not in context.chat_data:
-            context.chat_data['minTimes'] = dict()
-        if name not in context.chat_data['minTimes']:
-            context.chat_data['minTimes'][name] = dict()
-        if 'overall' not in context.chat_data['minTimes'][name]:
-            min_time = None
-            i = 0
-            while min_time is None and i < len(context.chat_data['overall'][name]):
-                min_time = context.chat_data['overall'][name][i]
-                i += 1
-            if min_time is not None:
-                for current_time in context.chat_data['overall'][name]:
-                    if current_time is not None and current_time < min_time:
-                        min_time = current_time
-                context.chat_data['minTimes'][name]['overall'] = min_time
-        # *** Min Times Region ***
-        days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
-        today = context.chat_data['overallDates'][-1].split('/')
-        day_index = datetime(int(today[2]), int(today[0]), int(today[1])).weekday()
-        if days[day_index] not in context.chat_data['minTimes'][name]:
-            # Get index of first day
-            first_day = context.chat_data['overallDates'][0].split('/')
-            first_day_index = datetime(int(first_day[2]), int(first_day[0]), int(first_day[1])).weekday()
-            # Shift index so first day corresponds to 0
-            start_index = day_index - first_day_index
-            if start_index < 0:
-                start_index += 7
-            min_time = None
-            i = start_index
-            while min_time is None and i < len(context.chat_data['overall'][name]):
-                min_time = context.chat_data['overall'][name][i]
-                i += 7
-            if min_time is not None:
-                while i < len(context.chat_data['overall'][name]):
-                    current_time = context.chat_data['overall'][name][i]
-                    if current_time is not None and current_time < min_time:
-                        min_time = current_time
+    if update.message.chat_id == doobieID:
+        name = str(update.message.from_user.first_name)
+        value = (update.message.text.partition(':'))
+        user_id = update.message.from_user.id
+        if 'ids' not in context.chat_data:
+            context.chat_data['ids'] = dict()
+        if user_id not in context.chat_data['ids'].keys():
+            context.chat_data['ids'][user_id] = dict()
+            context.chat_data['ids'][user_id]['Remind'] = True
+        context.chat_data['ids'][user_id]['Received'] = True
+        if len(value[2]) != 0 & value[0].isdigit() & value[2].isdigit():
+            first = value[0]
+            if len(first) == 0:
+                first = "0"
+            second = value[2]
+            total = 60 * int(first) + int(second)
+            # Compare to min time for today and overall=
+            if name == 'Max' and total == 26:
+                update.message.reply_sticker(sticker=
+                                             'CAACAgEAAxkBAAICJ15pj6hc7Nr4zNyJQT7camZOEgPUAAKGAAOkJocMxc_x7wE2OzwYBA')
+            if 'minTimes' not in context.chat_data:
+                context.chat_data['minTimes'] = dict()
+            if name not in context.chat_data['minTimes']:
+                context.chat_data['minTimes'][name] = dict()
+            if 'overall' not in context.chat_data['minTimes'][name]:
+                min_time = None
+                i = 0
+                while min_time is None and i < len(context.chat_data['overall'][name]):
+                    min_time = context.chat_data['overall'][name][i]
+                    i += 1
+                if min_time is not None:
+                    for current_time in context.chat_data['overall'][name]:
+                        if current_time is not None and current_time < min_time:
+                            min_time = current_time
+                    context.chat_data['minTimes'][name]['overall'] = min_time
+            # *** Min Times Region ***
+            days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+            today = context.chat_data['overallDates'][-1].split('/')
+            day_index = datetime(int(today[2]), int(today[0]), int(today[1])).weekday()
+            if days[day_index] not in context.chat_data['minTimes'][name]:
+                # Get index of first day
+                first_day = context.chat_data['overallDates'][0].split('/')
+                first_day_index = datetime(int(first_day[2]), int(first_day[0]), int(first_day[1])).weekday()
+                # Shift index so first day corresponds to 0
+                start_index = day_index - first_day_index
+                if start_index < 0:
+                    start_index += 7
+                min_time = None
+                i = start_index
+                while min_time is None and i < len(context.chat_data['overall'][name]):
+                    min_time = context.chat_data['overall'][name][i]
                     i += 7
-                context.chat_data['minTimes'][name][days[day_index]] = min_time
-        # Check if new best day and overall time
-        if total < context.chat_data['minTimes'][name][days[day_index]]:
-            best_time_for = days[day_index]
-            time_diff = time_to_string(context.chat_data['minTimes'][name][days[day_index]] - total)
-            best_time_for += f' (\u2193 {time_diff})'
-            context.chat_data['minTimes'][name][days[day_index]] = total
-            if total < context.chat_data['minTimes'][name]['overall']:
-                best_time_for += ' and overall'
-                time_diff = time_to_string(context.chat_data['minTimes'][name]['overall'] - total)
+                if min_time is not None:
+                    while i < len(context.chat_data['overall'][name]):
+                        current_time = context.chat_data['overall'][name][i]
+                        if current_time is not None and current_time < min_time:
+                            min_time = current_time
+                        i += 7
+                    context.chat_data['minTimes'][name][days[day_index]] = min_time
+            # Check if new best day and overall time
+            if total < context.chat_data['minTimes'][name][days[day_index]]:
+                best_time_for = days[day_index]
+                time_diff = time_to_string(context.chat_data['minTimes'][name][days[day_index]] - total)
                 best_time_for += f' (\u2193 {time_diff})'
-                context.chat_data['minTimes'][name]['overall'] = total
-            update.message.reply_text(f"New best {best_time_for} time for " + name + "!")
-        duplicate = False
-        # Mark as duplicate
-        if name in context.chat_data['daily']:
-            duplicate = context.chat_data['daily'][name] == total
-            # Make min time none if it is being overwritten by newly sent time
-            if not duplicate and days[day_index] in context.chat_data['minTimes'][name] and \
-                    context.chat_data['daily'][name] == context.chat_data['minTimes'][name][days[day_index]]:
-                del context.chat_data['minTimes'][name][days[day_index]]
-                min_deleted = days[day_index]
-                if 'overall' in context.chat_data['minTimes'][name] and \
-                        context.chat_data['daily'][name] == context.chat_data['minTimes'][name]['overall']:
-                    del context.chat_data['minTimes'][name]['overall']
-                    min_deleted += " and overall"
-                update.message.reply_text(f"Deleted best {min_deleted} time for {name}. Will be recalculated upon "
-                                          f"next entry.")
-        # Add time to end of overall list
-        context.chat_data['overall'][name][-1] = total
-        global globalChatData
-        if update.message.chat_id not in globalChatData:
-            globalChatData[update.message.chat_id] = context.chat_data
-        context.chat_data['daily'][name] = total
-        if not duplicate:
-            currentstandings(update, context)
+                context.chat_data['minTimes'][name][days[day_index]] = total
+                if total < context.chat_data['minTimes'][name]['overall']:
+                    best_time_for += ' and overall'
+                    time_diff = time_to_string(context.chat_data['minTimes'][name]['overall'] - total)
+                    best_time_for += f' (\u2193 {time_diff})'
+                    context.chat_data['minTimes'][name]['overall'] = total
+                update.message.reply_text(f"New best {best_time_for} time for " + name + "!")
+            duplicate = False
+            # Mark as duplicate
+            if name in context.chat_data['daily']:
+                duplicate = context.chat_data['daily'][name] == total
+                # Make min time none if it is being overwritten by newly sent time
+                if not duplicate and days[day_index] in context.chat_data['minTimes'][name] and \
+                        context.chat_data['daily'][name] == context.chat_data['minTimes'][name][days[day_index]]:
+                    del context.chat_data['minTimes'][name][days[day_index]]
+                    min_deleted = days[day_index]
+                    if 'overall' in context.chat_data['minTimes'][name] and \
+                            context.chat_data['daily'][name] == context.chat_data['minTimes'][name]['overall']:
+                        del context.chat_data['minTimes'][name]['overall']
+                        min_deleted += " and overall"
+                    update.message.reply_text(f"Deleted best {min_deleted} time for {name}. Will be recalculated upon "
+                                              f"next entry.")
+            # Add time to end of overall list
+            context.chat_data['overall'][name][-1] = total
+            global globalChatData
+            if update.message.chat_id not in globalChatData:
+                globalChatData[update.message.chat_id] = context.chat_data
+            context.chat_data['daily'][name] = total
+            if not duplicate:
+                currentstandings(update, context)
 
 
 def mytime(update, context):
-    key = str(update.message.from_user.first_name)
-    time = context.chat_data['daily'][key]
-    if key in context.chat_data['daily']:
-        update.message.reply_text(time_to_string(time))
-    else:
-        update.message.reply_text("No recorded time found for " + key)
+    if update.message.chat_id == doobieID:
+        key = str(update.message.from_user.first_name)
+        time = context.chat_data['daily'][key]
+        if key in context.chat_data['daily']:
+            update.message.reply_text(time_to_string(time))
+        else:
+            update.message.reply_text("No recorded time found for " + key)
 
 
 def dailytimes_manual(update, context):
-    dailytimes_job(context)
+    if update.message.chat_id == doobieID:
+        dailytimes_job(context)
 
 
 def removeLastDate(update, context):
-    context.chat_data['overallDates'].pop()
+    if update.message.chat_id == doobieID:
+        context.chat_data['overallDates'].pop()
 
 
 def removeLastTime(update, context):
-    for name in context.chat_data['overall']:
-        context.chat_data['overall'][name].pop()
+    if update.message.chat_id == doobieID:
+        for name in context.chat_data['overall']:
+            context.chat_data['overall'][name].pop()
 
 
 def dailytimes_job(context):
     global globalChatData
     for chatID in globalChatData:
+        if chatID == doobieID:
+            rank = []
+            dailyTimes = globalChatData[chatID]['daily']
+            for name, time in dailyTimes.items():
+                if len(rank) == 0:
+                    rank.append([name])
+                else:
+                    # iterate rank to insert name
+                    i = 0
+                    inserted = False
+                    while i < len(rank) and not (inserted):
+                        if time < dailyTimes[rank[i][0]]:
+                            rank.insert(i, [name])
+                            inserted = True
+                        elif time == dailyTimes[rank[i][0]]:
+                            rank[i].append(name)
+                            inserted = True
+                        else:
+                            i += 1
+                    if not (inserted):
+                        rank.append([name])
+            if len(rank) == 0:
+                context.bot.send_message(chatID, "Day passed with no recorded times")
+            else:
+                mg = "Final Rankings for Today:"
+                for i in range(len(rank)):
+                    time = dailyTimes[rank[i][0]]
+                    place = i + 1
+                    for name in rank[i]:
+                        mg = mg + "\n" + str(place) + " " + name + " - " + time_to_string(time) + " "
+                if len(rank[0]) == 1:
+                    mg += "\n" + rank[0][0] + " won!"
+                elif len(rank[0]) == 2:
+                    mg += "\n" + rank[0][0] + " and " + rank[0][1] + " won!"
+                else:
+                    mg += "\n"
+                    for j in range(len(rank[i] - 1)):
+                        mg += rank[0][j] + ", "
+                    mg += "and " + rank[0][len(rank[0]) - 1] + " won!"
+                context.bot.send_message(chatID, mg)
+                win_statuses = []
+                if 'streaks' not in globalChatData[chatID]:
+                    globalChatData[chatID]['streaks'] = dict()
+                if 'best_streak' not in globalChatData[chatID]:
+                    globalChatData[chatID]['best_streak'] = 0
+                for name in list(globalChatData[chatID]['streaks'].keys()):
+                    if name not in rank[0]:
+                        if globalChatData[chatID]['streaks'][name] > globalChatData[chatID]['best_streak']:
+                            globalChatData[chatID]['best_streak'] = globalChatData[chatID]['streaks'][name]
+                            context.bot.send_message(chatID, f'{name} ended the best streak on record - '
+                                                             f'{globalChatData[chatID]["streaks"][name]} days!')
+                        del globalChatData[chatID]['streaks'][name]
+                for name in rank[0]:
+                    if name not in globalChatData[chatID]['leaderboard']:
+                        globalChatData[chatID]['leaderboard'][name] = 1
+                    else:
+                        globalChatData[chatID]['leaderboard'][name] += 1
+                    status = emoji_status(globalChatData[chatID]['leaderboard'][name])
+                    if status[2]:
+                        win_statuses.append(f'{name} attained {status[0]} status!')
+                    if name in globalChatData[chatID]['streaks']:
+                        globalChatData[chatID]['streaks'][name] += 1
+                        # Check for longest streak, change admin title
+                        if globalChatData[chatID]['streaks'][name] > globalChatData[chatID]['best_streak']:
+                            if 'best_streak_name' not in globalChatData[chatID]:
+                                globalChatData[chatID]['best_streak_name'] = name
+                                admins = context.bot.get_chat_administrators(chatID)
+                                admin_id = next((admin.user.id for admin in admins if admin.user.first_name == name), None)
+                                if admin_id:
+                                    context.bot.set
+                            elif name != globalChatData[chatID]['best_streak_name']:
+
+                    else:
+                        globalChatData[chatID]['streaks'][name] = 1
+                total_rank = []
+                for name in globalChatData[chatID]['leaderboard']:
+                    if len(total_rank) == 0:
+                        total_rank.append([name])
+                    else:
+                        i = 0
+                        inserted = False
+                        while i < len(total_rank) and not inserted:
+                            if globalChatData[chatID]['leaderboard'][name] > \
+                                    globalChatData[chatID]['leaderboard'][total_rank[i][0]]:
+                                total_rank.insert(i, [name])
+                                inserted = True
+                            elif globalChatData[chatID]['leaderboard'][name] == \
+                                    globalChatData[chatID]['leaderboard'][total_rank[i][0]]:
+                                total_rank[i].append(name)
+                                inserted = True
+                            else:
+                                i += 1
+                        if not inserted:
+                            total_rank.append([name])
+                mg = "Overall Standings:"
+                sup = str.maketrans('0123456789', '⁰¹²³⁴⁵⁶⁷⁸⁹')
+                x = 'ˣ'
+                for i in range(len(total_rank)):
+                    for j in range(len(total_rank[i])):
+                        name = total_rank[i][j]
+                        place = i + 1
+                        streak = ''
+                        if name in globalChatData[chatID]['streaks'] and globalChatData[chatID]['streaks'][name] > 1:
+                            streak = str(globalChatData[chatID]['streaks'][name]).translate(sup)
+                        mg += "\n" + str(place) + " " + name + streak + " - " + str(
+                            globalChatData[chatID]['leaderboard'][name]) + " " + \
+                              emoji_status(globalChatData[chatID]['leaderboard'][name])[1]
+                for win_status in win_statuses:
+                    mg += "\n" + win_status
+                context.bot.send_message(chatID, mg)
+                for name in globalChatData[chatID]['overall']:
+                    globalChatData[chatID]['overall'][name].append(None)
+                if 'ids' in globalChatData[chatID]:
+                    for user_id in globalChatData[chatID]['ids']:
+                        globalChatData[chatID]['ids'][user_id]['Received'] = False
+                tz = timezone('EST')
+                tomorrow = datetime.now(tz) + timedelta(days=1)
+                globalChatData[chatID]['overallDates'].append(f'{tomorrow.month}/{tomorrow.day}/{tomorrow.year}')
+                globalChatData[chatID]['daily'].clear()
+                context.bot.unpinChatMessage(chatID)
+
+
+def currentstandings(update, context):
+    if update.message.chat_id == doobieID:
         rank = []
-        dailyTimes = globalChatData[chatID]['daily']
+        dailyTimes = context.chat_data['daily']
+        for name, time in dailyTimes.items():
+            if len(rank) == 0:
+                rank.append([name])
+            else:
+                # iterate rank to insert name
+                i = 0
+                inserted = False
+                while i < len(rank) and not (inserted):
+                    if time < dailyTimes[rank[i][0]]:
+                        rank.insert(i, [name])
+                        inserted = True
+                    elif time == dailyTimes[rank[i][0]]:
+                        rank[i].append(name)
+                        inserted = True
+                    else:
+                        i += 1
+                if not inserted:
+                    rank.append([name])
+        if len(rank) == 0:
+            update.message.reply_text('No recorded times found for today')
+        else:
+            mg = "Today's Rankings: "
+            sup = str.maketrans('0123456789', '⁰¹²³⁴⁵⁶⁷⁸⁹')
+            x = 'ˣ'
+            for i in range(len(rank)):
+                time = dailyTimes[rank[i][0]]
+                seconds = "" + str(time % 60)
+                if time % 60 < 10:
+                    seconds = "0" + seconds
+                place = i + 1
+                for name in rank[i]:
+                    streak = ''
+                    if 'streaks' in context.chat_data and name in context.chat_data['streaks']:
+                        if place == 1:
+                            streak = str(context.chat_data['streaks'][name] + 1).translate(sup)
+                        elif context.chat_data['streaks'][name] > 1:
+                            streak = str(context.chat_data['streaks'][name]).translate(sup)
+                            streak = x + streak
+                    mg = mg + "\n<b>" + str(place) + "</b> " + name + streak + " - " + str(int(time / 60)) + ":" + \
+                         seconds + " "
+            if len(context.chat_data['daily']) == 1 or not ('pinnedStandings' in context.chat_data):
+                context.chat_data['pinnedStandings'] = context.bot.send_message(update.message.chat_id, mg,
+                                                                                parse_mode=ParseMode.HTML)
+                context.bot.pinChatMessage(update.message.chat_id, context.chat_data['pinnedStandings'].message_id, True)
+            else:
+                context.bot.edit_message_text(mg, chat_id=update.message.chat_id,
+                                              message_id=context.chat_data['pinnedStandings'].message_id,
+                                              parse_mode=ParseMode.HTML)
+
+
+def currentstandings_manual(update, context):
+    if update.message.chat_id == doobieID:
+        rank = []
+        dailyTimes = context.chat_data['daily']
         for name, time in dailyTimes.items():
             if len(rank) == 0:
                 rank.append([name])
@@ -343,244 +538,80 @@ def dailytimes_job(context):
                 if not (inserted):
                     rank.append([name])
         if len(rank) == 0:
-            context.bot.send_message(chatID, "Day passed with no recorded times")
+            update.message.reply_text("No recorded times found for today")
         else:
-            mg = "Final Rankings for Today:"
-            for i in range(len(rank)):
-                time = dailyTimes[rank[i][0]]
-                place = i + 1
-                for name in rank[i]:
-                    mg = mg + "\n" + str(place) + " " + name + " - " + time_to_string(time) + " "
-            if len(rank[0]) == 1:
-                mg += "\n" + rank[0][0] + " won!"
-            elif len(rank[0]) == 2:
-                mg += "\n" + rank[0][0] + " and " + rank[0][1] + " won!"
-            else:
-                mg += "\n"
-                for j in range(len(rank[i] - 1)):
-                    mg += rank[0][j] + ", "
-                mg += "and " + rank[0][len(rank[0]) - 1] + " won!"
-            context.bot.send_message(chatID, mg)
-            win_statuses = []
-            if 'streaks' not in globalChatData[chatID]:
-                globalChatData[chatID]['streaks'] = dict()
-            if 'best_streak' not in globalChatData[chatID]:
-                globalChatData[chatID]['best_streak'] = 0
-            for name in list(globalChatData[chatID]['streaks'].keys()):
-                if name not in rank[0]:
-                    if globalChatData[chatID]['streaks'][name] > globalChatData[chatID]['best_streak']:
-                        globalChatData[chatID]['best_streak'] = globalChatData[chatID]['streaks'][name]
-                        context.bot.send_message(chatID, f'{name} ended the best streak on record - '
-                                                         f'{globalChatData[chatID]["streaks"][name]} days!')
-                    del globalChatData[chatID]['streaks'][name]
-            for name in rank[0]:
-                if name not in globalChatData[chatID]['leaderboard']:
-                    globalChatData[chatID]['leaderboard'][name] = 1
-                else:
-                    globalChatData[chatID]['leaderboard'][name] += 1
-                status = emoji_status(globalChatData[chatID]['leaderboard'][name])
-                if status[2]:
-                    win_statuses.append(f'{name} attained {status[0]} status!')
-                if name in globalChatData[chatID]['streaks']:
-                    globalChatData[chatID]['streaks'][name] += 1
-                else:
-                    globalChatData[chatID]['streaks'][name] = 1
-            total_rank = []
-            for name in globalChatData[chatID]['leaderboard']:
-                if len(total_rank) == 0:
-                    total_rank.append([name])
-                else:
-                    i = 0
-                    inserted = False
-                    while i < len(total_rank) and not inserted:
-                        if globalChatData[chatID]['leaderboard'][name] > \
-                                globalChatData[chatID]['leaderboard'][total_rank[i][0]]:
-                            total_rank.insert(i, [name])
-                            inserted = True
-                        elif globalChatData[chatID]['leaderboard'][name] == \
-                                globalChatData[chatID]['leaderboard'][total_rank[i][0]]:
-                            total_rank[i].append(name)
-                            inserted = True
-                        else:
-                            i += 1
-                    if not inserted:
-                        total_rank.append([name])
-            mg = "Overall Standings:"
+            mg = "Today's Rankings: "
             sup = str.maketrans('0123456789', '⁰¹²³⁴⁵⁶⁷⁸⁹')
             x = 'ˣ'
-            for i in range(len(total_rank)):
-                for j in range(len(total_rank[i])):
-                    name = total_rank[i][j]
-                    place = i + 1
+            for i in range(len(rank)):
+                time = dailyTimes[rank[i][0]]
+                seconds = "" + str(time % 60)
+                if time % 60 < 10:
+                    seconds = "0" + seconds
+                place = i + 1
+                for name in rank[i]:
                     streak = ''
-                    if name in globalChatData[chatID]['streaks'] and globalChatData[chatID]['streaks'][name] > 1:
-                        streak = str(globalChatData[chatID]['streaks'][name]).translate(sup)
-                    mg += "\n" + str(place) + " " + name + streak + " - " + str(
-                        globalChatData[chatID]['leaderboard'][name]) + " " + \
-                          emoji_status(globalChatData[chatID]['leaderboard'][name])[1]
-            for win_status in win_statuses:
-                mg += "\n" + win_status
-            context.bot.send_message(chatID, mg)
-            for name in globalChatData[chatID]['overall']:
-                globalChatData[chatID]['overall'][name].append(None)
-            if 'ids' in globalChatData[chatID]:
-                for user_id in globalChatData[chatID]['ids']:
-                    globalChatData[chatID]['ids'][user_id]['Received'] = False
-            tz = timezone('EST')
-            tomorrow = datetime.now(tz) + timedelta(days=1)
-            globalChatData[chatID]['overallDates'].append(f'{tomorrow.month}/{tomorrow.day}/{tomorrow.year}')
-            globalChatData[chatID]['daily'].clear()
-            context.bot.unpinChatMessage(chatID)
-
-
-def currentstandings(update, context):
-    rank = []
-    dailyTimes = context.chat_data['daily']
-    for name, time in dailyTimes.items():
-        if len(rank) == 0:
-            rank.append([name])
-        else:
-            # iterate rank to insert name
-            i = 0
-            inserted = False
-            while i < len(rank) and not (inserted):
-                if time < dailyTimes[rank[i][0]]:
-                    rank.insert(i, [name])
-                    inserted = True
-                elif time == dailyTimes[rank[i][0]]:
-                    rank[i].append(name)
-                    inserted = True
-                else:
-                    i += 1
-            if not inserted:
-                rank.append([name])
-    if len(rank) == 0:
-        update.message.reply_text('No recorded times found for today')
-    else:
-        mg = "Today's Rankings: "
-        sup = str.maketrans('0123456789', '⁰¹²³⁴⁵⁶⁷⁸⁹')
-        x = 'ˣ'
-        for i in range(len(rank)):
-            time = dailyTimes[rank[i][0]]
-            seconds = "" + str(time % 60)
-            if time % 60 < 10:
-                seconds = "0" + seconds
-            place = i + 1
-            for name in rank[i]:
-                streak = ''
-                if 'streaks' in context.chat_data and name in context.chat_data['streaks']:
-                    if place == 1:
-                        streak = str(context.chat_data['streaks'][name] + 1).translate(sup)
-                    elif context.chat_data['streaks'][name] > 1:
-                        streak = str(context.chat_data['streaks'][name]).translate(sup)
-                        streak = x + streak
-                mg = mg + "\n<b>" + str(place) + "</b> " + name + streak + " - " + str(int(time / 60)) + ":" + \
-                     seconds + " "
-        if len(context.chat_data['daily']) == 1 or not ('pinnedStandings' in context.chat_data):
-            context.chat_data['pinnedStandings'] = context.bot.send_message(update.message.chat_id, mg,
-                                                                            parse_mode=ParseMode.HTML)
-            context.bot.pinChatMessage(update.message.chat_id, context.chat_data['pinnedStandings'].message_id, True)
-        else:
-            context.bot.edit_message_text(mg, chat_id=update.message.chat_id,
-                                          message_id=context.chat_data['pinnedStandings'].message_id,
-                                          parse_mode=ParseMode.HTML)
-
-
-def currentstandings_manual(update, context):
-    rank = []
-    dailyTimes = context.chat_data['daily']
-    for name, time in dailyTimes.items():
-        if len(rank) == 0:
-            rank.append([name])
-        else:
-            # iterate rank to insert name
-            i = 0
-            inserted = False
-            while i < len(rank) and not (inserted):
-                if time < dailyTimes[rank[i][0]]:
-                    rank.insert(i, [name])
-                    inserted = True
-                elif time == dailyTimes[rank[i][0]]:
-                    rank[i].append(name)
-                    inserted = True
-                else:
-                    i += 1
-            if not (inserted):
-                rank.append([name])
-    if len(rank) == 0:
-        update.message.reply_text("No recorded times found for today")
-    else:
-        mg = "Today's Rankings: "
-        sup = str.maketrans('0123456789', '⁰¹²³⁴⁵⁶⁷⁸⁹')
-        x = 'ˣ'
-        for i in range(len(rank)):
-            time = dailyTimes[rank[i][0]]
-            seconds = "" + str(time % 60)
-            if time % 60 < 10:
-                seconds = "0" + seconds
-            place = i + 1
-            for name in rank[i]:
-                streak = ''
-                if 'streaks' in context.chat_data and name in context.chat_data['streaks']:
-                    if place == 1:
-                        streak = str(context.chat_data['streaks'][name] + 1).translate(sup)
-                    elif context.chat_data['streaks'][name] > 1:
-                        streak = str(context.chat_data['streaks'][name] + 1).translate(sup)
-                        streak = x + streak
-                mg = mg + "\n" + str(place) + " " + name + streak + " - " + str(int(time / 60)) + ":" + seconds + " "
-        update.message.reply_text(mg, parse_mode=ParseMode.HTML)
+                    if 'streaks' in context.chat_data and name in context.chat_data['streaks']:
+                        if place == 1:
+                            streak = str(context.chat_data['streaks'][name] + 1).translate(sup)
+                        elif context.chat_data['streaks'][name] > 1:
+                            streak = str(context.chat_data['streaks'][name] + 1).translate(sup)
+                            streak = x + streak
+                    mg = mg + "\n" + str(place) + " " + name + streak + " - " + str(int(time / 60)) + ":" + seconds + " "
+            update.message.reply_text(mg, parse_mode=ParseMode.HTML)
 
 
 def leaderboard(update, context):
-    totalRank = []
-    for name in context.chat_data['leaderboard']:
-        if len(totalRank) == 0:
-            totalRank.append([name])
-        else:
-            i = 0
-            inserted = False
-            while i < len(totalRank) and not (inserted):
-                if context.chat_data['leaderboard'][name] > context.chat_data['leaderboard'][totalRank[i][0]]:
-                    totalRank.insert(i, [name])
-                    inserted = True
-                elif context.chat_data['leaderboard'][name] == context.chat_data['leaderboard'][totalRank[i][0]]:
-                    totalRank[i].append(name)
-                    inserted = True
-                else:
-                    i += 1
-            if not (inserted):
+    if update.message.chat_id == doobieID:
+        totalRank = []
+        for name in context.chat_data['leaderboard']:
+            if len(totalRank) == 0:
                 totalRank.append([name])
-    """ mg = "Overall Standings:"
-    for i in range(len(totalRank)):
-        for j in range(len(totalRank[i])):
-            name = totalRank[i][j]
-            place = i + 1
-            mg += "\n" + str(place) + " " + name + " - " + str(context.chat_data['leaderboard'][name]) + " "
-    update.message.reply_text(mg)"""
-    mg = "Here is the overall leaderboard. "
-    places = ["first", "second", "third", "fourth", "fifth"]
-    for i in range(len(totalRank)):
-        if i != 0:
-            mg += "Then, "
-            mg += f"in {places[i]} place is "
-        if len(totalRank[i]) == 1:
-            mg += f"{totalRank[i][0]} "
-        elif len(totalRank[i]) == 2:
-            mg += f"{totalRank[i][0]} and {totalRank[i][1]} "
-        else:
-            for j in range(len(totalRank[i]) - 1):
-                mg += f"{totalRank[i][j]}, "
-            mg += f"and {totalRank[i][len(totalRank[i]) - 1]} "
-        points = context.chat_data['leaderboard'][totalRank[i][0]]
-        mg += f"with {points} win"
-        if points > 1:
-            mg += "s"
-        mg += ". "
-    audio = gTTS(text=mg, lang='en', slow=False)
-    gTTS()
-    audio.save("leaderboard.ogg")
-    context.bot.send_voice(chat_id=doobieID, voice=open('leaderboard.ogg', 'rb'))
-    os.remove("leaderboard.ogg")
+            else:
+                i = 0
+                inserted = False
+                while i < len(totalRank) and not (inserted):
+                    if context.chat_data['leaderboard'][name] > context.chat_data['leaderboard'][totalRank[i][0]]:
+                        totalRank.insert(i, [name])
+                        inserted = True
+                    elif context.chat_data['leaderboard'][name] == context.chat_data['leaderboard'][totalRank[i][0]]:
+                        totalRank[i].append(name)
+                        inserted = True
+                    else:
+                        i += 1
+                if not (inserted):
+                    totalRank.append([name])
+        """ mg = "Overall Standings:"
+        for i in range(len(totalRank)):
+            for j in range(len(totalRank[i])):
+                name = totalRank[i][j]
+                place = i + 1
+                mg += "\n" + str(place) + " " + name + " - " + str(context.chat_data['leaderboard'][name]) + " "
+        update.message.reply_text(mg)"""
+        mg = "Here is the overall leaderboard. "
+        places = ["first", "second", "third", "fourth", "fifth"]
+        for i in range(len(totalRank)):
+            if i != 0:
+                mg += "Then, "
+                mg += f"in {places[i]} place is "
+            if len(totalRank[i]) == 1:
+                mg += f"{totalRank[i][0]} "
+            elif len(totalRank[i]) == 2:
+                mg += f"{totalRank[i][0]} and {totalRank[i][1]} "
+            else:
+                for j in range(len(totalRank[i]) - 1):
+                    mg += f"{totalRank[i][j]}, "
+                mg += f"and {totalRank[i][len(totalRank[i]) - 1]} "
+            points = context.chat_data['leaderboard'][totalRank[i][0]]
+            mg += f"with {points} win"
+            if points > 1:
+                mg += "s"
+            mg += ". "
+        audio = gTTS(text=mg, lang='en', slow=False)
+        gTTS()
+        audio.save("leaderboard.ogg")
+        context.bot.send_voice(chat_id=doobieID, voice=open('leaderboard.ogg', 'rb'))
+        os.remove("leaderboard.ogg")
 
 
 def insultmax(update, context):
@@ -612,15 +643,17 @@ def sendJob(context):
 def sendVar(update, context):
     global globalChatData
     for chatID in globalChatData:
-        context.bot.send_message(chatID, str(globalChatData[chatID]))
+        if chatID == doobieID:
+            context.bot.send_message(chatID, str(globalChatData[chatID]))
 
 
 def minTimes(update, context):
-    name = str(update.message.from_user.first_name)
-    mg = f'Best times for {name}:'
-    for day in context.chat_data['minTimes'][name]:
-        mg += f'\n{day} - {time_to_string(context.chat_data["minTimes"][name][day])}'
-    update.message.reply_text(mg)
+    if update.message.chat_id == doobieID:
+        name = str(update.message.from_user.first_name)
+        mg = f'Best times for {name}:'
+        for day in context.chat_data['minTimes'][name]:
+            mg += f'\n{day} - {time_to_string(context.chat_data["minTimes"][name][day])}'
+        update.message.reply_text(mg)
 
 
 def time_to_string(time):
@@ -699,10 +732,11 @@ def send_reminders(update, context):
 
 
 def reset_streak(update, context):
-    initial_value = context.chat_data['streaks'][context.args[0]]
-    context.chat_data['streaks'][context.args[0]] = int(context.args[1])
-    update.message.reply_text(
-        f"{context.args[0]}'s streak reset from {initial_value} to {context.chat_data['streaks'][context.args[0]]}")
+    if update.message.chat_id == doobieID:
+        initial_value = context.chat_data['streaks'][context.args[0]]
+        context.chat_data['streaks'][context.args[0]] = int(context.args[1])
+        update.message.reply_text(
+            f"{context.args[0]}'s streak reset from {initial_value} to {context.chat_data['streaks'][context.args[0]]}")
 
 
 def main():
