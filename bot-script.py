@@ -26,7 +26,8 @@ import copy
 from telegram import ParseMode, Sticker
 from gtts import gTTS
 from datetime import datetime, time, timedelta
-from crosswordstats import lineplot, avgtimes, lineplot_best, lineplot_best_fit, calendar_plot, lineplot_best_fit_week
+from crosswordstats import lineplot, avgtimes, lineplot_best, lineplot_best_fit, calendar_plot, lineplot_best_fit_week, \
+    pie_plot, total_wins_plot
 import os
 
 # Enable logging
@@ -743,6 +744,20 @@ def reset_streak(update, context):
             f"{context.args[0]}'s streak reset from {initial_value} to {context.chat_data['streaks'][context.args[0]]}")
 
 
+def pie(update, context):
+    if update.message.chat_id == doobieID:
+        pie_plot(context.chat_data['leaderboard'], 'pie.png')
+        context.bot.send_photo(chat_id=update.message.chat_id, photo=open('pie.png', 'rb'))
+        os.remove('pie.png')
+
+
+def total(update, context):
+    if update.message.chat_id == doobieID:
+        total_wins_plot(context.chat_data['overall'], context.chat_data['overallDates'], 'total.png')
+        context.bot.send_photo(chat_id=update.message.chat_id, photo=open('total.png', 'rb'))
+        os.remove('total.png')
+
+
 def main():
     """Start the bot."""
     # Create the Updater and pass it your bot's token.
@@ -782,6 +797,8 @@ def main():
     dp.add_handler(CommandHandler("stats_best_fit", stats_best_fit))
     dp.add_handler(CommandHandler("week_best_fit", week_best_fit))
     dp.add_handler(CommandHandler("calendar", calendar))
+    dp.add_handler(CommandHandler("pie", pie))
+    dp.add_handler(CommandHandler("total", total))
     # on noncommand i.e message - echo the message on Telegram
     # log all errors
     dp.add_error_handler(error)
