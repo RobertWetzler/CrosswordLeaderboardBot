@@ -168,7 +168,7 @@ def calendar_plot(overall_dict, dates, filename):
         min = 999999
         weight = None
         for name in names:
-            if overall_dict[name][day_index]:
+            if overall_dict[name][day_index] is not None:
                 if overall_dict[name][day_index] < min:
                     min = overall_dict[name][day_index]
                     weight = weights[names.index(name)]
@@ -183,4 +183,53 @@ def calendar_plot(overall_dict, dates, filename):
     formatter = plt.FuncFormatter(lambda val, loc: labels[int(val)])
     fig.colorbar(ax[0].get_children()[1], ax=ax.ravel().tolist(), shrink=0.4, format=formatter)
     plt.savefig(filename)
+    plt.close('all')
+
+def total_wins_plot(overall_dict, dates, filename):
+    fig, ax = plt.subplots()
+    wins_dict = {name: [] for name in overall_dict}
+    for day_index in range(len(dates)):
+        min_time = None
+        min_names = []
+        for name in overall_dict:
+            if overall_dict[name][day_index] is not None:
+                if min_time is None:
+                    min_time = overall_dict[name][day_index]
+                    min_names = [name]
+                elif overall_dict[name][day_index] < min_time:
+                    min_time = overall_dict[name][day_index]
+                    min_names = [name]
+                elif overall_dict[name][day_index] == min_time:
+                    min_names.append(name)
+        for name in overall_dict:
+            if len(wins_dict[name]) == 0:
+                total = 0
+            else:
+                total = wins_dict[name][-1]
+            if name in min_names:
+                wins_dict[name].append(total+1)
+            else:
+                wins_dict[name].append(total)
+
+    datetimes = [dt.datetime(int(date.split('/')[2]),int(date.split('/')[0]), int(date.split('/')[1])) for date in dates]
+    for name in wins_dict:
+        print(f'{name}: {wins_dict[name]}')
+        plt.plot(datetimes, wins_dict[name], '-', label=name, ms=3)
+    plt.gcf().autofmt_xdate()
+    ax.xaxis.set_major_locator(mdates.AutoDateLocator())
+    ax.xaxis.set_major_formatter(DateFormatter("%m-%d"))
+    plt.title("Cumulative Wins")
+    plt.legend()
+    plt.xlabel('Day')
+    plt.ylabel('Wins')
+    plt.savefig(filename, dpi=500)
+    plt.close('all')
+
+def pie_plot(leaderboard_dict, filename):
+    labels = [name for name in leaderboard_dict]
+    sizes = [wins for wins in leaderboard_dict.values()]
+    plt.pie(sizes, labels=labels, startangle=90, autopct='%1.1f%%')
+    plt.axis('equal')
+    plt.title('Pie Chart of Leaderboard')
+    plt.savefig(filename, dpi=500)
     plt.close('all')
