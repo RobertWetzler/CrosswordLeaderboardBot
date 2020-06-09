@@ -213,7 +213,6 @@ def total_wins_plot(overall_dict, dates, filename):
 
     datetimes = [dt.datetime(int(date.split('/')[2]),int(date.split('/')[0]), int(date.split('/')[1])) for date in dates]
     for name in wins_dict:
-        print(f'{name}: {wins_dict[name]}')
         plt.plot(datetimes, wins_dict[name], '-', label=name, ms=3)
     plt.gcf().autofmt_xdate()
     ax.xaxis.set_major_locator(mdates.AutoDateLocator())
@@ -231,5 +230,63 @@ def pie_plot(leaderboard_dict, filename):
     plt.pie(sizes, labels=labels, startangle=90, autopct='%1.1f%%')
     plt.axis('equal')
     plt.title('Pie Chart of Leaderboard')
+    plt.savefig(filename, dpi=500)
+    plt.close('all')
+
+def total_time_plot(overall_dict, dates, filename):
+    fig, ax = plt.subplots()
+    times_dict = {name: [] for name in overall_dict}
+    for name in overall_dict:
+        for day_index in range(len(dates)):
+            if overall_dict[name][day_index] is None:
+                times_dict[name].append(None)
+            else:
+                current_sum = overall_dict[name][day_index]
+                if len(times_dict[name]) == 0:
+                    times_dict[name].append(current_sum)
+                else:
+                    last_time_index = day_index - 1
+                    while last_time_index > 0 and times_dict[name][last_time_index] is None:
+                        last_time_index -= 1
+                    if last_time_index > 0:
+                        current_sum += times_dict[name][last_time_index]
+                    elif times_dict[name][0] is not None:
+                        current_sum += times_dict[name][0]
+                    times_dict[name].append(current_sum)
+        missed_days = times_dict[name].count(None)
+        times = [seconds for seconds in overall_dict[name] if seconds is not None]
+        average = sum(times)/len(times)
+        print(f'{name} -  Average: {average}')
+        print(f'{name} -  Missed Days: {missed_days}')
+        missed_day_sum = missed_days * average
+        print(f'{name} -  Missed Days * Average: {missed_day_sum}')
+        last_time_index = len(times_dict[name]) - 1
+        while last_time_index > 0 and times_dict[name][last_time_index] is None:
+            last_time_index -= 1
+        if last_time_index > 0:
+            print(f'{name} -  Last Sum: {times_dict[name][last_time_index]}')
+            missed_day_sum += times_dict[name][last_time_index]
+        elif times_dict[name][0] is not None:
+            missed_day_sum += times_dict[name][0]
+        times_dict[name].append(missed_day_sum)
+
+    datetimes = [dt.datetime(int(date.split('/')[2]),int(date.split('/')[0]), int(date.split('/')[1])) for date in dates]
+    last_date = dates[-1]
+    last_datetime = dt.datetime(int(last_date.split('/')[2]), int(last_date.split('/')[0]),
+                                int(last_date.split('/')[1]))
+    next_datetime = last_datetime + dt.timedelta(days=1)
+    datetimes.append(next_datetime)
+    for name in times_dict:
+        plt.plot(datetimes, times_dict[name], '-', label=name, ms=3)
+    plt.gcf().autofmt_xdate()
+    ax.xaxis.set_major_locator(mdates.AutoDateLocator())
+    ax.xaxis.set_major_formatter(DateFormatter("%m-%d"))
+    formatter = matplotlib.ticker.FuncFormatter(lambda s, y: str(dt.timedelta(seconds=s)))
+    ax.yaxis.set_major_formatter(formatter)
+    plt.title(r"Cumulative Time (with Missed Days × Average Time appended)")
+    plt.legend()
+    plt.xlabel('Day')
+    plt.ylabel('Time')
+    plt.tight_layout()
     plt.savefig(filename, dpi=500)
     plt.close('all')
