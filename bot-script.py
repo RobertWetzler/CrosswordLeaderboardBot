@@ -27,7 +27,7 @@ from telegram import ParseMode, Sticker
 from gtts import gTTS
 from datetime import datetime, time, timedelta
 from crosswordstats import lineplot, avgtimes, lineplot_best, lineplot_best_fit, calendar_plot, lineplot_best_fit_week, \
-    pie_plot, total_wins_plot
+    pie_plot, total_wins_plot, total_time_plot
 import os
 
 # Enable logging
@@ -757,6 +757,11 @@ def total(update, context):
         context.bot.send_photo(chat_id=update.message.chat_id, photo=open('total.png', 'rb'))
         os.remove('total.png')
 
+def total_time(update, context):
+    if update.message.chat_id == doobieID:
+        total_time_plot(context.chat_data['overall'], context.chat_data['overallDates'], 'total_time.png')
+        context.bot.send_photo(chat_id=update.message.chat_id, photo=open('total_time.png', 'rb'))
+        os.remove('total_time.png')
 
 def main():
     """Start the bot."""
@@ -799,6 +804,7 @@ def main():
     dp.add_handler(CommandHandler("calendar", calendar))
     dp.add_handler(CommandHandler("pie", pie))
     dp.add_handler(CommandHandler("total", total))
+    dp.add_handler(CommandHandler("total_time", total_time))
     # on noncommand i.e message - echo the message on Telegram
     # log all errors
     dp.add_error_handler(error)
