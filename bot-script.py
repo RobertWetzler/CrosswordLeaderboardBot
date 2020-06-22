@@ -27,7 +27,7 @@ from telegram import ParseMode, Sticker
 from gtts import gTTS
 from datetime import datetime, time, timedelta
 from crosswordstats import lineplot, avgtimes, lineplot_best, lineplot_best_fit, calendar_plot, lineplot_best_fit_week, \
-    pie_plot, total_wins_plot, total_time_plot
+    pie_plot, pie_time_plot, total_wins_plot, total_time_plot
 import os
 
 # Enable logging
@@ -751,6 +751,13 @@ def pie(update, context):
         os.remove('pie.png')
 
 
+def pie_gif(update, context):
+    if update.message.chat_id == doobieID:
+        pie_time_plot(context.chat_data['overall'], context.chat_data['overallDates'], 'pie.gif')
+        context.bot.send_animation(chat_id=update.message.chat_id, animation=open('pie.gif', 'rb'))
+        os.remove('pie.gif')
+
+
 def total(update, context):
     if update.message.chat_id == doobieID:
         total_wins_plot(context.chat_data['overall'], context.chat_data['overallDates'], 'total.png')
@@ -803,6 +810,7 @@ def main():
     dp.add_handler(CommandHandler("week_best_fit", week_best_fit))
     dp.add_handler(CommandHandler("calendar", calendar))
     dp.add_handler(CommandHandler("pie", pie))
+    dp.add_handler(CommandHandler("pie_gif", pie_gif))
     dp.add_handler(CommandHandler("total", total))
     dp.add_handler(CommandHandler("total_time", total_time))
     # on noncommand i.e message - echo the message on Telegram

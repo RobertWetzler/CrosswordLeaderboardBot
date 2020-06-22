@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import matplotlib
 import matplotlib.dates as mdates
 from matplotlib.dates import DateFormatter
+from matplotlib.animation import FuncAnimation, PillowWriter
 import time
 import datetime as dt
 import pandas as pd
@@ -232,6 +233,56 @@ def pie_plot(leaderboard_dict, filename):
     plt.title('Pie Chart of Leaderboard')
     plt.savefig(filename, dpi=500)
     plt.close('all')
+
+
+def pie_time_plot(overall_dict, dates, filename):
+    wins_dict = {name: [] for name in overall_dict}
+    for day_index in range(len(dates)):
+        min_time = None
+        min_names = []
+        for name in overall_dict:
+            if overall_dict[name][day_index] is not None:
+                if min_time is None:
+                    min_time = overall_dict[name][day_index]
+                    min_names = [name]
+                elif overall_dict[name][day_index] < min_time:
+                    min_time = overall_dict[name][day_index]
+                    min_names = [name]
+                elif overall_dict[name][day_index] == min_time:
+                    min_names.append(name)
+        for name in overall_dict:
+            if len(wins_dict[name]) == 0:
+                total = 0
+            else:
+                total = wins_dict[name][-1]
+            if name in min_names:
+                wins_dict[name].append(total+1)
+            else:
+                wins_dict[name].append(total)
+
+    fig, ax = plt.subplots(figsize=(8,6))
+    seconds = 15
+    total_kb = 10000
+    frames = len(dates)
+    fps = frames/(seconds) # animation will always be 30 seconds
+    kbs = total_kb/seconds
+    ani = FuncAnimation(fig, _update, frames=frames, repeat=False, fargs=(wins_dict, dates, ax), repeat_delay=1000)
+    writer = PillowWriter(fps=fps, bitrate=kbs, metadata={'title': 'Pie Chart Gif'})
+    ani.save(filename, writer=writer)
+    plt.close('all')
+
+
+def _update(num, *fargs):
+    wins_dict = fargs[0]
+    dates = fargs[1]
+    ax = fargs[2]
+    ax.clear()
+    ax.axis('equal')
+    wins = [wins_dict[name][num] for name in wins_dict if wins_dict[name][num] != 0]
+    names = [f'{name} ({wins_dict[name][num]})' for name in wins_dict if wins_dict[name][num] != 0]
+    ax.pie(wins, labels=names, explode=[0.01]*len(wins), autopct='%1.1f%%', startangle=90)
+    ax.set_title(dates[num])
+
 
 def total_time_plot(overall_dict, dates, filename):
     fig, ax = plt.subplots()
