@@ -210,7 +210,7 @@ def averages(update, context):
 def calendar(update, context):
     if update.message.chat_id == doobieID:
         calendar_plot(context.chat_data['overall'], context.chat_data['overallDates'], 'calendar.png')
-        context.bot.send_document(chat_id=update.message.chat_id, document=open('calendar.png', 'rb'))
+        context.bot.send_photo(chat_id=update.message.chat_id, photo=open('calendar.png', 'rb'))
         os.remove('calendar.png')
 
 
@@ -754,7 +754,7 @@ def pie(update, context):
 def pie_gif(update, context):
     if update.message.chat_id == doobieID:
         pie_time_plot(context.chat_data['overall'], context.chat_data['overallDates'], 'pie.gif')
-        context.bot.send_document(chat_id=update.message.chat_id, document=open('pie.gif', 'rb'))
+        context.bot.send_animation(chat_id=update.message.chat_id, animation=open('pie.gif', 'rb'))
         os.remove('pie.gif')
 
 
