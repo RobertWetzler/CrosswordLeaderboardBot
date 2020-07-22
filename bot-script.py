@@ -654,7 +654,7 @@ def sendVar(update, context):
 
 def minTimes(update, context):
     if update.message.chat_id == doobieID:
-        minTimes(context.chat_data['minTimes'], 'best_times.png')
+        best_times(context.chat_data['minTimes'], 'best_times.png')
         context.bot.send_photo(chat_id=update.message.chat_id, photo=open('best_times.png', 'rb'))
         os.remove('best_times.png')
 
