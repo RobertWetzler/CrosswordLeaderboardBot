@@ -163,16 +163,19 @@ def avgtimes(overall_dict, dates, filename):
 
 def best_times(min_dict, filename):
     labels = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
-    everyone = [min_dict[name].get(day, None) for name in min_dict for day in labels]
+    everyone = [[min_dict[name].get(day, None) for day in labels] for name in min_dict]
     fig, ax = plt.subplots()
     df = pd.DataFrame(everyone, columns=labels)
     formatter = matplotlib.ticker.FuncFormatter(lambda s, y: time.strftime('%M:%S', time.gmtime(s)))
     ax.yaxis.set_major_formatter(formatter)
     df.T.plot.bar(ax=ax)
     ax.legend([name for name in min_dict])
+    for p in ax.patches:
+        ax.annotate(np.round(p.get_height(),decimals=2), (p.get_x()+p.get_width()/2., p.get_height()),
+                    ha='center', va='center', xytext=(0, 6), textcoords='offset points', fontsize='x-small')
     plt.title("Best Crossword Times by Day of the Week")
     plt.gcf().autofmt_xdate()
-    plt.savefig(filename, dpi=500)
+    plt.savefig(filename, dpi=800)
     plt.close('all')
 
 def calendar_plot(overall_dict, dates, filename):
