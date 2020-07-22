@@ -163,13 +163,17 @@ def avgtimes(overall_dict, dates, filename):
 
 def best_times(min_dict, filename):
     labels = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
-    everyone = [[min_dict[name].get(day, None) for day in labels] for name in min_dict]
+    # Doobie order
+    names = list(min_dict.keys())
+    if set(names) == {'Robert', 'Macey', 'Levi', 'Max', 'Asher'}:
+        names = ['Max', 'Macey', 'Asher', 'Robert', 'Levi']
+    everyone = [[min_dict[name].get(day, None) for day in labels] for name in names]
     fig, ax = plt.subplots()
     df = pd.DataFrame(everyone, columns=labels)
     formatter = matplotlib.ticker.FuncFormatter(lambda s, y: time.strftime('%M:%S', time.gmtime(s)))
     ax.yaxis.set_major_formatter(formatter)
     df.T.plot.bar(ax=ax)
-    ax.legend([name for name in min_dict])
+    ax.legend(names)
     for p in ax.patches:
         ax.annotate(np.round(p.get_height(),decimals=2), (p.get_x()+p.get_width()/2., p.get_height()),
                     ha='center', va='center', xytext=(0, 6), textcoords='offset points', fontsize='x-small')
