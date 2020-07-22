@@ -27,7 +27,7 @@ from telegram import ParseMode, Sticker
 from gtts import gTTS
 from datetime import datetime, time, timedelta
 from crosswordstats import lineplot, avgtimes, lineplot_best, lineplot_best_fit, calendar_plot, lineplot_best_fit_week, \
-    pie_plot, pie_time_plot, total_wins_plot, total_time_plot
+    pie_plot, pie_time_plot, total_wins_plot, total_time_plot, best_times
 import os
 
 # Enable logging
@@ -654,11 +654,9 @@ def sendVar(update, context):
 
 def minTimes(update, context):
     if update.message.chat_id == doobieID:
-        name = str(update.message.from_user.first_name)
-        mg = f'Best times for {name}:'
-        for day in context.chat_data['minTimes'][name]:
-            mg += f'\n{day} - {time_to_string(context.chat_data["minTimes"][name][day])}'
-        update.message.reply_text(mg)
+        minTimes(context.chat_data['minTimes'], 'best_times.png')
+        context.bot.send_photo(chat_id=update.message.chat_id, photo=open('best_times.png', 'rb'))
+        os.remove('best_times.png')
 
 
 def time_to_string(time):
