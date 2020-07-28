@@ -8,6 +8,8 @@ import datetime as dt
 import pandas as pd
 import numpy as np
 import calmap
+from matplotlib.ticker import MultipleLocator, AutoMinorLocator
+
 
 def lineplot(overall_dict, date_list, filename, ylim=None, daysBack=None):
     fig, ax = plt.subplots()
@@ -109,7 +111,7 @@ def lineplot_best(overall_dict, dates, filename, ylim=None):
             if (len(best_non) + len(best_sat)) < len(overall_dict[name]):
                 best_curr.append(overall_dict[name][i])
                 x_curr.append(x[i])
-            elif overall_dict[name][i] != None and best_curr[idx] > overall_dict[name][i]:
+            elif overall_dict[name][i] is not None and best_curr[idx] > overall_dict[name][i]:
                 best_curr[idx] = overall_dict[name][i]
     plt.plot(x_non, best_non, 'o-k', label="Mini Crosswords", ms=3)
     plt.plot(x_sat, best_sat, 'o-b', label="Saturday Midi's", ms=3)
@@ -156,6 +158,9 @@ def avgtimes(overall_dict, dates, filename):
     ax.yaxis.set_major_formatter(formatter)
     df.T.plot.bar(ax=ax)
     ax.legend([name for name in overall_dict])
+    for p in ax.patches:
+        ax.annotate(np.round(p.get_height(), decimals=2), (p.get_x()+p.get_width()/2., p.get_height()),
+                    ha='center', va='center', xytext=(0, 6), textcoords='offset points', fontsize='x-small')
     plt.title("Average Crossword Times by Day of the Week")
     plt.gcf().autofmt_xdate()
     plt.savefig(filename, dpi=500)
@@ -175,7 +180,7 @@ def best_times(min_dict, filename):
     df.T.plot.bar(ax=ax)
     ax.legend(names)
     for p in ax.patches:
-        ax.annotate(np.round(p.get_height(),decimals=2), (p.get_x()+p.get_width()/2., p.get_height()),
+        ax.annotate(np.round(p.get_height(), decimals=2), (p.get_x()+p.get_width()/2., p.get_height()),
                     ha='center', va='center', xytext=(0, 6), textcoords='offset points', fontsize='x-small')
     plt.title("Best Crossword Times by Day of the Week")
     plt.gcf().autofmt_xdate()
@@ -239,10 +244,12 @@ def total_wins_plot(overall_dict, dates, filename):
     plt.gcf().autofmt_xdate()
     ax.xaxis.set_major_locator(mdates.AutoDateLocator())
     ax.xaxis.set_major_formatter(DateFormatter("%m-%d"))
+    ax.yaxis.set_minor_locator(AutoMinorLocator())
     plt.title("Cumulative Wins")
     plt.legend()
     plt.xlabel('Day')
     plt.ylabel('Wins')
+    plt.grid(b=True, which='both')
     plt.savefig(filename, dpi=500)
     plt.close('all')
 
@@ -349,16 +356,18 @@ def total_time_plot(overall_dict, dates, filename):
     next_datetime = last_datetime + dt.timedelta(days=1)
     datetimes.append(next_datetime)
     for name in times_dict:
-        plt.plot(datetimes, times_dict[name], '-', label=name, ms=3)
+        plt.plot(datetimes, times_dict[name], '.-', label=name, ms=3)
     plt.gcf().autofmt_xdate()
     ax.xaxis.set_major_locator(mdates.AutoDateLocator())
     ax.xaxis.set_major_formatter(DateFormatter("%m-%d"))
     formatter = matplotlib.ticker.FuncFormatter(lambda s, y: str(dt.timedelta(seconds=s)))
     ax.yaxis.set_major_formatter(formatter)
+    ax.yaxis.set_minor_locator(AutoMinorLocator())
     plt.title(r"Cumulative Time (with Missed Days × Average Time appended)")
     plt.legend()
     plt.xlabel('Day')
     plt.ylabel('Time')
+    plt.grid(b=True, which='both')
     plt.tight_layout()
     plt.savefig(filename, dpi=500)
     plt.close('all')
