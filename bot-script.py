@@ -16,6 +16,8 @@ bot.
 import logging
 import datetime
 import random
+import statistics
+
 from pytz import timezone
 import pytz
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, InlineQueryHandler, PicklePersistence
@@ -152,7 +154,7 @@ def testVar(update, context):
         update.message.reply_text(str(globalChatData))
 
 
-def stats(update, context):
+def times(update, context):
     if update.message.chat_id == doobieID:
         topStr = context.args[0]
         daysBack = context.args[1]
@@ -768,6 +770,27 @@ def total_time(update, context):
         context.bot.send_photo(chat_id=update.message.chat_id, photo=open('total_time.png', 'rb'))
         os.remove('total_time.png')
 
+def stats(update, context):
+    name = str(update.message.from_user.first_name)
+    user_times = [t for t in context.chat_data['overall']['Robert'] if t is not None]
+    mean = statistics.mean(user_times)
+    median = statistics.median(user_times)
+    mode = statistics.mode(user_times)
+    mode_count = user_times.count(mode)
+    variance = round(statistics.pvariance(user_times, mean), 2)
+    stdev = round(statistics.pstdev(user_times, mean), 2)
+    mean = round(mean, 2)
+
+    message = f'<b>Stats for {name}:</b>\n' \
+              f'Mean: {mean} sec\n' \
+              f'Median: {median} seconds\n' \
+              f'Mode: {mode} sec ({mode_count} times)\n' \
+              f'Variance: {variance} sec²\n' \
+              f'Standard Deviation: {stdev} sec'
+
+    update.message.reply_text(message, parse_mode=ParseMode.HTML)
+
+
 def main():
     """Start the bot."""
     # Create the Updater and pass it your bot's token.
@@ -793,7 +816,7 @@ def main():
     dp.add_handler(MessageHandler(Filters.regex(r'^[\d]*:[\d]{2}$'), addtime_msg))
     dp.add_handler(CommandHandler("sendVar", sendVar))
     dp.add_handler(CommandHandler("initoverall", initoverall))
-    dp.add_handler(CommandHandler("stats", stats))
+    dp.add_handler(CommandHandler("times", times))
     dp.add_handler(CommandHandler("stats_best", stats_best))
     dp.add_handler(CommandHandler("removeLastDate", removeLastDate))
     dp.add_handler(CommandHandler("removeLastTime", removeLastTime))
