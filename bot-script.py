@@ -772,7 +772,7 @@ def total_time(update, context):
 
 def stats(update, context):
     name = str(update.message.from_user.first_name)
-    user_times = [t for t in context.chat_data['overall']['Robert'] if t is not None]
+    user_times = [t for t in context.chat_data['overall'][name] if t is not None]
     mean = statistics.mean(user_times)
     median = statistics.median(user_times)
     mode = statistics.mode(user_times)
