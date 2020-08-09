@@ -832,6 +832,7 @@ def main():
     dp.add_handler(CommandHandler("calendar", calendar))
     dp.add_handler(CommandHandler("pie", pie))
     dp.add_handler(CommandHandler("pie_gif", pie_gif))
+    dp.add_handler(CommandHandler("stats", stats))
     dp.add_handler(CommandHandler("total", total))
     dp.add_handler(CommandHandler("total_time", total_time))
     # on noncommand i.e message - echo the message on Telegram
