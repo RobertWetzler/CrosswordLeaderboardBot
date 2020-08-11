@@ -31,7 +31,7 @@ from datetime import datetime, time, timedelta
 from crosswordstats import lineplot, avgtimes, lineplot_best, lineplot_best_fit, calendar_plot, lineplot_best_fit_week, \
     pie_plot, pie_time_plot, total_wins_plot, total_time_plot, best_times
 import os
-
+from collections import Counter
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
@@ -775,16 +775,15 @@ def stats(update, context):
     user_times = [t for t in context.chat_data['overall'][name] if t is not None]
     mean = statistics.mean(user_times)
     median = statistics.median(user_times)
-    mode = statistics.mode(user_times)
-    mode_count = user_times.count(mode)
+    modes = Counter(user_times).most_common()
     variance = round(statistics.pvariance(user_times, mean), 2)
     stdev = round(statistics.pstdev(user_times, mean), 2)
     mean = round(mean, 2)
 
     message = f'<b>Stats for {name}:</b>\n' \
               f'Mean: {mean} sec\n' \
-              f'Median: {median} seconds\n' \
-              f'Mode: {mode} sec ({mode_count} times)\n' \
+              f'Median: {median} sec\n' \
+              f'Mode: {", ".join(str(m[0]) for m in modes)} sec ({modes[0][1]} times)\n' \
               f'Variance: {variance} sec²\n' \
               f'Standard Deviation: {stdev} sec'
 
