@@ -771,11 +771,17 @@ def total_time(update, context):
         os.remove('total_time.png')
 
 def stats(update, context):
-    name = str(update.message.from_user.first_name)
+    command = update.message.text.split()
+    if len(command) > 1 and command[1] in context.chat_data['overall']:
+        name = command[1]
+    else:
+        name = str(update.message.from_user.first_name)
     user_times = [t for t in context.chat_data['overall'][name] if t is not None]
     mean = statistics.mean(user_times)
     median = statistics.median(user_times)
-    modes = Counter(user_times).most_common()
+    commonality = Counter(user_times).most_common()
+    max_count = commonality[0][1]
+    modes = [item[0] for item in commonality if item[1] == max_count]
     variance = round(statistics.pvariance(user_times, mean), 2)
     stdev = round(statistics.pstdev(user_times, mean), 2)
     mean = round(mean, 2)
@@ -783,7 +789,7 @@ def stats(update, context):
     message = f'<b>Stats for {name}:</b>\n' \
               f'Mean: {mean} sec\n' \
               f'Median: {median} sec\n' \
-              f'Mode: {", ".join(str(m[0]) for m in modes)} sec ({modes[0][1]} times)\n' \
+              f'Mode: {", ".join(modes)} sec ({max_count} times)\n' \
               f'Variance: {variance} sec²\n' \
               f'Standard Deviation: {stdev} sec'
 
