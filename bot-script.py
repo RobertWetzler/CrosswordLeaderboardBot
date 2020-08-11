@@ -781,7 +781,7 @@ def stats(update, context):
     median = statistics.median(user_times)
     commonality = Counter(user_times).most_common()
     max_count = commonality[0][1]
-    modes = [item[0] for item in commonality if item[1] == max_count]
+    modes = [str(item[0]) for item in commonality if item[1] == max_count]
     variance = round(statistics.pvariance(user_times, mean), 2)
     stdev = round(statistics.pstdev(user_times, mean), 2)
     mean = round(mean, 2)
