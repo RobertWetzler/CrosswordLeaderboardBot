@@ -1,9 +1,11 @@
 import matplotlib.pyplot as plt
 import matplotlib
+import seaborn as sns
 import matplotlib.dates as mdates
 from matplotlib.dates import DateFormatter
 from matplotlib.animation import FuncAnimation, PillowWriter
 import time
+import itertools
 import datetime as dt
 import pandas as pd
 import numpy as np
@@ -36,6 +38,7 @@ def lineplot(overall_dict, date_list, filename, ylim=None, daysBack=None):
     plt.savefig(filename, dpi=500)
     plt.close('all')
 
+
 def lineplot_best_fit(overall_dict, date_list, filename, name, degree):
     fig, ax = plt.subplots()
     dates = list(date_list)
@@ -47,7 +50,7 @@ def lineplot_best_fit(overall_dict, date_list, filename, name, degree):
             dates_indices.append(i)
     coef = np.polyfit(dates_indices, [times[i] for i in dates_indices], degree)
     best_fit_fn = np.poly1d(coef)
-    plt.plot(x, times, 'o', [x[i] for i in dates_indices], best_fit_fn(dates_indices),  ms=3)
+    plt.plot(x, times, 'o', [x[i] for i in dates_indices], best_fit_fn(dates_indices), ms=3)
     plt.gcf().autofmt_xdate()
     formatter = matplotlib.ticker.FuncFormatter(lambda s, y: time.strftime('%M:%S', time.gmtime(s)))
     ax.yaxis.set_major_formatter(formatter)
@@ -83,7 +86,7 @@ def lineplot_best_fit_week(overall_dict, date_list, filename, name, degree):
             coef = np.polyfit(day_indices[weekday], day_times[weekday], degree)
             best_fit_fn = np.poly1d(coef)
             indices = [i for i in range(len(x)) if (day_indices[weekday][0] <= i <= day_indices[weekday][-1])]
-            plt.plot([x[i] for i in indices], best_fit_fn(indices), label=weekday,  ms=3)
+            plt.plot([x[i] for i in indices], best_fit_fn(indices), label=weekday, ms=3)
     plt.plot(x, times, 'o', ms=3)
     plt.gcf().autofmt_xdate()
     formatter = matplotlib.ticker.FuncFormatter(lambda s, y: time.strftime('%M:%S', time.gmtime(s)))
@@ -92,11 +95,12 @@ def lineplot_best_fit_week(overall_dict, date_list, filename, name, degree):
     ax.xaxis.set_major_formatter(DateFormatter("%m-%d"))
     plt.title(f"Best Fit Curve by Day for {name} of Degree {degree}")
     plt.legend()
-    plt.ylim(top = max([valid_time for valid_time in times if valid_time]) + 10, bottom=0)
+    plt.ylim(top=max([valid_time for valid_time in times if valid_time]) + 10, bottom=0)
     plt.xlabel('Day')
     plt.ylabel('Time')
     plt.savefig(filename, dpi=500)
     plt.close('all')
+
 
 def lineplot_best(overall_dict, dates, filename, ylim=None):
     fig, ax = plt.subplots()
@@ -130,6 +134,7 @@ def lineplot_best(overall_dict, dates, filename, ylim=None):
     plt.savefig(filename, dpi=500)
     plt.close('all')
 
+
 def avgtimes(overall_dict, dates, filename):
     week_avgs = dict()
     for name in overall_dict:
@@ -159,12 +164,13 @@ def avgtimes(overall_dict, dates, filename):
     df.T.plot.bar(ax=ax)
     ax.legend([name for name in overall_dict])
     for p in ax.patches:
-        ax.annotate(np.round(p.get_height(), decimals=2), (p.get_x()+p.get_width()/2., p.get_height()),
+        ax.annotate(np.round(p.get_height(), decimals=2), (p.get_x() + p.get_width() / 2., p.get_height()),
                     ha='center', va='center', xytext=(0, 6), textcoords='offset points', fontsize='x-small')
     plt.title("Average Crossword Times by Day of the Week")
     plt.gcf().autofmt_xdate()
     plt.savefig(filename, dpi=500)
     plt.close('all')
+
 
 def best_times(min_dict, filename):
     labels = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
@@ -180,12 +186,13 @@ def best_times(min_dict, filename):
     df.T.plot.bar(ax=ax)
     ax.legend(names)
     for p in ax.patches:
-        ax.annotate(np.round(p.get_height(), decimals=2), (p.get_x()+p.get_width()/2., p.get_height()),
+        ax.annotate(np.round(p.get_height(), decimals=2), (p.get_x() + p.get_width() / 2., p.get_height()),
                     ha='center', va='center', xytext=(0, 6), textcoords='offset points', fontsize='x-small')
     plt.title("Best Crossword Times by Day of the Week")
     plt.gcf().autofmt_xdate()
     plt.savefig(filename, dpi=800)
     plt.close('all')
+
 
 def calendar_plot(overall_dict, dates, filename):
     names = list(overall_dict.keys())
@@ -202,15 +209,17 @@ def calendar_plot(overall_dict, dates, filename):
                 elif overall_dict[name][day_index] == min:
                     weight = 0
         daily_weights.append(weight)
-    datetimes = [dt.datetime(int(date.split('/')[2]),int(date.split('/')[0]), int(date.split('/')[1])) for date in dates]
+    datetimes = [dt.datetime(int(date.split('/')[2]), int(date.split('/')[0]), int(date.split('/')[1])) for date in
+                 dates]
     series = pd.Series(data=daily_weights, index=datetimes)
     cmap = matplotlib.colors.ListedColormap(['grey', 'skyblue', 'navajowhite', 'palegreen', 'lightcoral', 'plum'])
-    fig, ax = calmap.calendarplot(series, fillcolor='silver', cmap=cmap, fig_kws=dict(figsize=(10,4)))
+    fig, ax = calmap.calendarplot(series, fillcolor='silver', cmap=cmap, fig_kws=dict(figsize=(10, 4)))
     labels = ['Tie'] + names
     formatter = plt.FuncFormatter(lambda val, loc: labels[int(val)])
     fig.colorbar(ax[0].get_children()[1], ax=ax.ravel().tolist(), shrink=0.4, format=formatter)
     plt.savefig(filename)
     plt.close('all')
+
 
 def total_wins_plot(overall_dict, dates, filename):
     fig, ax = plt.subplots()
@@ -234,11 +243,12 @@ def total_wins_plot(overall_dict, dates, filename):
             else:
                 total = wins_dict[name][-1]
             if name in min_names:
-                wins_dict[name].append(total+1)
+                wins_dict[name].append(total + 1)
             else:
                 wins_dict[name].append(total)
 
-    datetimes = [dt.datetime(int(date.split('/')[2]),int(date.split('/')[0]), int(date.split('/')[1])) for date in dates]
+    datetimes = [dt.datetime(int(date.split('/')[2]), int(date.split('/')[0]), int(date.split('/')[1])) for date in
+                 dates]
     for name in wins_dict:
         plt.plot(datetimes, wins_dict[name], '-', label=name, ms=3)
     plt.gcf().autofmt_xdate()
@@ -252,6 +262,7 @@ def total_wins_plot(overall_dict, dates, filename):
     plt.grid(b=True, which='both')
     plt.savefig(filename, dpi=500)
     plt.close('all')
+
 
 def pie_plot(leaderboard_dict, filename):
     labels = [name for name in leaderboard_dict]
@@ -284,16 +295,16 @@ def pie_time_plot(overall_dict, dates, filename):
             else:
                 total = wins_dict[name][-1]
             if name in min_names:
-                wins_dict[name].append(total+1)
+                wins_dict[name].append(total + 1)
             else:
                 wins_dict[name].append(total)
 
-    fig, ax = plt.subplots(figsize=(8,6))
+    fig, ax = plt.subplots(figsize=(8, 6))
     seconds = 15
     total_kb = 10000
     frames = len(dates)
-    fps = frames/(seconds) # animation will always be 30 seconds
-    kbs = total_kb/seconds
+    fps = frames / (seconds)  # animation will always be 30 seconds
+    kbs = total_kb / seconds
     ani = FuncAnimation(fig, _update, frames=frames, repeat=False, fargs=(wins_dict, dates, ax), repeat_delay=1000)
     writer = PillowWriter(fps=fps, bitrate=kbs, metadata={'title': 'Pie Chart Gif'})
     ani.save(filename, writer=writer)
@@ -308,7 +319,7 @@ def _update(num, *fargs):
     ax.axis('equal')
     wins = [wins_dict[name][num] for name in wins_dict if wins_dict[name][num] != 0]
     names = [f'{name} ({wins_dict[name][num]})' for name in wins_dict if wins_dict[name][num] != 0]
-    ax.pie(wins, labels=names, explode=[0.01]*len(wins), autopct='%1.1f%%', startangle=90)
+    ax.pie(wins, labels=names, explode=[0.01] * len(wins), autopct='%1.1f%%', startangle=90)
     ax.set_title(dates[num])
 
 
@@ -334,7 +345,7 @@ def total_time_plot(overall_dict, dates, filename):
                     times_dict[name].append(current_sum)
         missed_days = times_dict[name].count(None)
         times = [seconds for seconds in overall_dict[name] if seconds is not None]
-        average = sum(times)/len(times)
+        average = sum(times) / len(times)
         print(f'{name} -  Average: {average}')
         print(f'{name} -  Missed Days: {missed_days}')
         missed_day_sum = missed_days * average
@@ -349,7 +360,8 @@ def total_time_plot(overall_dict, dates, filename):
             missed_day_sum += times_dict[name][0]
         times_dict[name].append(missed_day_sum)
 
-    datetimes = [dt.datetime(int(date.split('/')[2]),int(date.split('/')[0]), int(date.split('/')[1])) for date in dates]
+    datetimes = [dt.datetime(int(date.split('/')[2]), int(date.split('/')[0]), int(date.split('/')[1])) for date in
+                 dates]
     last_date = dates[-1]
     last_datetime = dt.datetime(int(last_date.split('/')[2]), int(last_date.split('/')[0]),
                                 int(last_date.split('/')[1]))
@@ -370,4 +382,65 @@ def total_time_plot(overall_dict, dates, filename):
     plt.grid(b=True, which='both')
     plt.tight_layout()
     plt.savefig(filename, dpi=500)
+    plt.close('all')
+
+
+def histogram(overall_dict, filename, n_bins):
+    fig, ax = plt.subplots()
+    bin = np.arange(n_bins)
+    range = (0, 60)
+    times = [[t for t in overall_dict[name] if t is not None] for name in overall_dict]
+    plt.hist(times, bin, range=range, histtype='bar', label=list((overall_dict.keys())))
+    plt.legend()
+    plt.title('Histogram of Submitted Times')
+    plt.savefig(filename, dpi=500)
+    plt.close('all')
+
+
+def violin_plot(overall_dict, dates, filename):
+    fig, ax = plt.subplots()
+    plt.title('Violin Plot')
+    sns.set(style='whitegrid', palette='pastel', color_codes=True)
+    # Create name column
+    # List of each name * number of items stored under that name
+    name_col = list(itertools.chain.from_iterable([[n] * len(overall_dict[n]) for n in overall_dict]))
+    # Create time column
+    time_col = [t for n in overall_dict for t in overall_dict[n]]
+    # Create saturday column
+    datetimes = [dt.datetime.strptime(d, '%m/%d/%Y').date() for d in dates]
+    saturday_col = ['Yes' if d.weekday() == 5 else 'No' for d in datetimes * len(overall_dict)]
+    data = pd.DataFrame(data={'Name': name_col, 'Time': time_col, 'Saturday': saturday_col})
+    # Create violin plot
+    sns_plot = sns.violinplot(x='Name', y='Time', hue='Saturday', split=True, inner='quart',
+                              pallete={'Yes': 'y', 'No': 'b'},
+                              cut=0,
+                              data=data)
+    formatter = matplotlib.ticker.FuncFormatter(lambda s, y: time.strftime('%M:%S', time.gmtime(s)))
+    ax.yaxis.set_major_formatter(formatter)
+    sns_fig = sns_plot.get_figure()
+    plt.grid(b=True, axis='y')
+    sns_fig.savefig(filename)
+    plt.close('all')
+
+
+def swarm_plot(overall_dict, dates, filename):
+    fig, ax = plt.subplots(figsize=(12, 5))
+    plt.title('Swarm Plot')
+    sns.set(style='whitegrid', color_codes=True)
+    # Create name column
+    # List of each name * number of items stored under that name
+    name_col = list(itertools.chain.from_iterable([[n] * len(overall_dict[n]) for n in overall_dict]))
+    # Create time column
+    time_col = [t for n in overall_dict for t in overall_dict[n]]
+    # Create saturday column
+    datetimes = [dt.datetime.strptime(d, '%m/%d/%Y').date() for d in dates]
+    saturday_col = ['Yes' if d.weekday() == 5 else 'No' for d in datetimes * len(overall_dict)]
+    data = pd.DataFrame(data={'Name': name_col, 'Time': time_col, 'Saturday': saturday_col})
+    # Create violin plot
+    sns_plot = sns.swarmplot(x='Name', y='Time', hue='Saturday', data=data, size=3)
+    formatter = matplotlib.ticker.FuncFormatter(lambda s, y: time.strftime('%M:%S', time.gmtime(s)))
+    ax.yaxis.set_major_formatter(formatter)
+    sns_fig = sns_plot.get_figure()
+    plt.grid(b=True, axis='y')
+    sns_fig.savefig(filename)
     plt.close('all')

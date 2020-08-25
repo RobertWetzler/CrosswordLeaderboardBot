@@ -29,7 +29,7 @@ from telegram import ParseMode, Sticker
 from gtts import gTTS
 from datetime import datetime, time, timedelta
 from crosswordstats import lineplot, avgtimes, lineplot_best, lineplot_best_fit, calendar_plot, lineplot_best_fit_week, \
-    pie_plot, pie_time_plot, total_wins_plot, total_time_plot, best_times
+    pie_plot, pie_time_plot, total_wins_plot, total_time_plot, best_times, violin_plot, swarm_plot
 import os
 from collections import Counter
 # Enable logging
@@ -764,11 +764,27 @@ def total(update, context):
         context.bot.send_photo(chat_id=update.message.chat_id, photo=open('total.png', 'rb'))
         os.remove('total.png')
 
+
 def total_time(update, context):
     if update.message.chat_id == doobieID:
         total_time_plot(context.chat_data['overall'], context.chat_data['overallDates'], 'total_time.png')
         context.bot.send_photo(chat_id=update.message.chat_id, photo=open('total_time.png', 'rb'))
         os.remove('total_time.png')
+
+
+def violin(update, context):
+    if update.message.chat_id == doobieID:
+        violin_plot(context.chat_data['overall'], context.chat_data['overallDates'], 'violin.png')
+        context.bot.send_photo(chat_id=update.message.chat_id, photo=open('violin.png', 'rb'))
+        os.remove('violin.png')
+
+
+def swarm(update, context):
+    if update.message.chat_id == doobieID:
+        swarm_plot(context.chat_data['overall'], context.chat_data['overallDates'], 'swarm.png')
+        context.bot.send_photo(chat_id=update.message.chat_id, photo=open('swarm.png', 'rb'))
+        os.remove('swarm.png')
+
 
 def stats(update, context):
     command = update.message.text.split()
@@ -840,6 +856,9 @@ def main():
     dp.add_handler(CommandHandler("stats", stats))
     dp.add_handler(CommandHandler("total", total))
     dp.add_handler(CommandHandler("total_time", total_time))
+    dp.add_handler(CommandHandler("violin", violin))
+    dp.add_handler(CommandHandler("swarm", swarm))
+
     # on noncommand i.e message - echo the message on Telegram
     # log all errors
     dp.add_error_handler(error)
