@@ -807,7 +807,7 @@ def stats(update, context):
     mean = round(mean, 2)
 
     message = f'<b>Stats for {name}:</b>\n' \
-              f'Total: {sum_time}'\
+              f'Total: {sum_time}\n'\
               f'Mean: {mean} sec\n' \
               f'Median: {median} sec\n' \
               f'Mode: {", ".join(modes)} sec ({max_count} times)\n' \
@@ -822,7 +822,7 @@ def rankings(update, context):
         ranks = rankings_plot(context.chat_data['overall'], context.chat_data['overallDates'], 'rankings.png')
         mg = '<b>Ranked Rankings:</b>\n'
         for i, name in enumerate(sorted(ranks.keys(), key=ranks.get, reverse=True)):
-            mg += f'<b>{i+1}</b>{name}: {ranks[name]}\n'
+            mg += f'<b>{i+1}</b> {name}: {ranks[name]}\n'
         context.bot.send_photo(chat_id=update.message.chat_id, photo=open('rankings.png', 'rb'))
         context.bot.send_message(update.message.chat_id, mg, parse_mode=ParseMode.HTML)
         os.remove('rankings.png')
