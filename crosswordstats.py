@@ -444,3 +444,121 @@ def swarm_plot(overall_dict, dates, filename):
     plt.grid(b=True, axis='y')
     sns_fig.savefig(filename)
     plt.close('all')
+
+
+def rankings_plot(overall_dict, dates, filename):
+    fig, ax = plt.subplots()
+    scores = [10, 8, 5, 3, 1]
+    rank_dict = {name: [] for name in overall_dict}
+    for day_index in range(len(dates)):
+        daily_rank = []
+        did_not_play = []
+        for name in overall_dict:
+            user_time = overall_dict[name][day_index]
+            if user_time is None:
+                did_not_play.append(name)
+            elif len(daily_rank) == 0:
+                daily_rank.append([name])
+            else:
+                # iterate rank to insert name
+                i = 0
+                inserted = False
+                while i < len(daily_rank) and not inserted:
+                    if user_time < overall_dict[daily_rank[i][0]][day_index]:
+                        daily_rank.insert(i, [name])
+                        inserted = True
+                    elif user_time == overall_dict[daily_rank[i][0]][day_index]:
+                        daily_rank[i].append(name)
+                        inserted = True
+                    else:
+                        i += 1
+                if not inserted:
+                    daily_rank.append([name])
+        # distribute scores. Ties mean they get assigned the average of their place - two first means (10 + 8) // 2
+        scores_copy = list(scores)
+        mg = ''
+        for place in daily_rank:
+            score = 0
+            for i in range(len(place)):
+                score += scores_copy.pop(0)
+            # Take average for ties
+            score //= len(place)
+            # Add score to rank_dict list
+            for name in place:
+                if len(rank_dict[name]) == 0:
+                    total = 0
+                else:
+                    total = rank_dict[name][-1]
+                rank_dict[name].append(total + score)
+                mg += f'{name}: {score} '
+        for name in did_not_play:
+            if len(rank_dict[name]) == 0:
+                total = 0
+            else:
+                total = rank_dict[name][-1]
+            rank_dict[name].append(total)
+            mg += f'{name}: {0} '
+
+    datetimes = [dt.datetime(int(date.split('/')[2]), int(date.split('/')[0]), int(date.split('/')[1])) for date in
+                 dates]
+    for name in rank_dict:
+        plt.plot(datetimes, rank_dict[name], '-', label=name, ms=3)
+    plt.gcf().autofmt_xdate()
+    ax.xaxis.set_major_locator(mdates.AutoDateLocator())
+    ax.xaxis.set_major_formatter(DateFormatter("%m-%d"))
+    ax.yaxis.set_minor_locator(AutoMinorLocator())
+    plt.title("Ranked Rankings")
+    plt.legend()
+    plt.xlabel('Day')
+    plt.ylabel('Wins')
+    plt.grid(b=True, which='both')
+    plt.savefig(filename, dpi=500)
+    plt.close('all')
+    return {name: scores[-1] for (name, scores) in rank_dict.items()}
+
+
+def percentage_plot(overall_dict, dates, filename):
+    fig, ax = plt.subplots()
+    wins_dict = {name: [] for name in overall_dict}
+    perc_dict = {name: [] for name in overall_dict}
+    for day_index in range(len(dates)):
+        min_time = None
+        min_names = []
+        for name in overall_dict:
+            if overall_dict[name][day_index] is not None:
+                if min_time is None:
+                    min_time = overall_dict[name][day_index]
+                    min_names = [name]
+                elif overall_dict[name][day_index] < min_time:
+                    min_time = overall_dict[name][day_index]
+                    min_names = [name]
+                elif overall_dict[name][day_index] == min_time:
+                    min_names.append(name)
+        for name in overall_dict:
+            if len(wins_dict[name]) == 0:
+                total = 0
+            else:
+                total = wins_dict[name][-1]
+            if name in min_names:
+                wins_dict[name].append(total + 1)
+            else:
+                wins_dict[name].append(total)
+        sum_wins = sum(wins_dict[name][-1] for name in wins_dict)
+        for name in overall_dict:
+            perc_dict[name].append(100 * wins_dict[name][-1] / sum_wins)
+
+    datetimes = [dt.datetime(int(date.split('/')[2]), int(date.split('/')[0]), int(date.split('/')[1])) for date in
+                 dates]
+    for name in wins_dict:
+        plt.plot(datetimes, perc_dict[name], '-', label=name, ms=3)
+    plt.gcf().autofmt_xdate()
+    ax.xaxis.set_major_locator(mdates.AutoDateLocator())
+    ax.xaxis.set_major_formatter(DateFormatter("%m-%d"))
+    ax.yaxis.set_minor_locator(AutoMinorLocator())
+    plt.title("Percentage of Leaderboard Over Time")
+    plt.legend()
+    plt.xlabel('Day')
+    plt.ylabel('Percentage of Leaderboard')
+    plt.grid(b=True, which='both')
+    plt.savefig(filename, dpi=500)
+    plt.close('all')

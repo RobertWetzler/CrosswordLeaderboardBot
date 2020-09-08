@@ -29,7 +29,9 @@ from telegram import ParseMode, Sticker
 from gtts import gTTS
 from datetime import datetime, time, timedelta
 from crosswordstats import lineplot, avgtimes, lineplot_best, lineplot_best_fit, calendar_plot, lineplot_best_fit_week, \
-    pie_plot, pie_time_plot, total_wins_plot, total_time_plot, best_times, violin_plot, swarm_plot
+    pie_plot, pie_time_plot, total_wins_plot, total_time_plot, best_times, violin_plot, swarm_plot, rankings_plot, \
+    percentage_plot
+
 import os
 from collections import Counter
 # Enable logging
@@ -352,7 +354,7 @@ def dailytimes_job(context):
                     # iterate rank to insert name
                     i = 0
                     inserted = False
-                    while i < len(rank) and not (inserted):
+                    while i < len(rank) and not inserted:
                         if time < dailyTimes[rank[i][0]]:
                             rank.insert(i, [name])
                             inserted = True
@@ -371,17 +373,17 @@ def dailytimes_job(context):
                     time = dailyTimes[rank[i][0]]
                     place = i + 1
                     for name in rank[i]:
-                        mg = mg + "\n" + str(place) + " " + name + " - " + time_to_string(time) + " "
+                        mg = mg + "\n<b>" + str(place) + "</b> " + name + " - " + time_to_string(time) + " "
                 if len(rank[0]) == 1:
                     mg += "\n" + rank[0][0] + " won!"
                 elif len(rank[0]) == 2:
                     mg += "\n" + rank[0][0] + " and " + rank[0][1] + " won!"
                 else:
                     mg += "\n"
-                    for j in range(len(rank[i] - 1)):
+                    for j in range(len(rank[0]) - 1):
                         mg += rank[0][j] + ", "
                     mg += "and " + rank[0][len(rank[0]) - 1] + " won!"
-                context.bot.send_message(chatID, mg)
+                context.bot.send_message(chatID, mg, parse_mode=ParseMode.HTML)
                 win_statuses = []
                 if 'streaks' not in globalChatData[chatID]:
                     globalChatData[chatID]['streaks'] = dict()
@@ -440,7 +442,8 @@ def dailytimes_job(context):
                                 i += 1
                         if not inserted:
                             total_rank.append([name])
-                mg = "Overall Standings:"
+                mg = "<b>Overall Standings:</b>"
+                # Streak superscript
                 sup = str.maketrans('0123456789', '⁰¹²³⁴⁵⁶⁷⁸⁹')
                 x = 'ˣ'
                 for i in range(len(total_rank)):
@@ -450,12 +453,12 @@ def dailytimes_job(context):
                         streak = ''
                         if name in globalChatData[chatID]['streaks'] and globalChatData[chatID]['streaks'][name] > 1:
                             streak = str(globalChatData[chatID]['streaks'][name]).translate(sup)
-                        mg += "\n" + str(place) + " " + name + streak + " - " + str(
+                        mg += "\n<b>" + str(place) + "</b> " + name + streak + " - " + str(
                             globalChatData[chatID]['leaderboard'][name]) + " " + \
                               emoji_status(globalChatData[chatID]['leaderboard'][name])[1]
                 for win_status in win_statuses:
                     mg += "\n" + win_status
-                context.bot.send_message(chatID, mg)
+                context.bot.send_message(chatID, mg, parse_mode=ParseMode.HTML)
                 for name in globalChatData[chatID]['overall']:
                     globalChatData[chatID]['overall'][name].append(None)
                 if 'ids' in globalChatData[chatID]:
@@ -793,6 +796,7 @@ def stats(update, context):
     else:
         name = str(update.message.from_user.first_name)
     user_times = [t for t in context.chat_data['overall'][name] if t is not None]
+    sum_time = str(datetime.timedelta(seconds=sum(user_times)))
     mean = statistics.mean(user_times)
     median = statistics.median(user_times)
     commonality = Counter(user_times).most_common()
@@ -803,6 +807,7 @@ def stats(update, context):
     mean = round(mean, 2)
 
     message = f'<b>Stats for {name}:</b>\n' \
+              f'Total: {sum_time}'\
               f'Mean: {mean} sec\n' \
               f'Median: {median} sec\n' \
               f'Mode: {", ".join(modes)} sec ({max_count} times)\n' \
@@ -810,6 +815,24 @@ def stats(update, context):
               f'Standard Deviation: {stdev} sec'
 
     update.message.reply_text(message, parse_mode=ParseMode.HTML)
+
+
+def rankings(update, context):
+    if update.message.chat_id == doobieID:
+        ranks = rankings_plot(context.chat_data['overall'], context.chat_data['overallDates'], 'rankings.png')
+        mg = '<b>Ranked Rankings:</b>\n'
+        for i, name in enumerate(sorted(ranks.keys(), key=ranks.get, reverse=True)):
+            mg += f'<b>{i+1}</b>{name}: {ranks[name]}'
+        context.bot.send_photo(chat_id=update.message.chat_id, photo=open('rankings.png', 'rb'))
+        context.bot.send_message(update.message.chat_id, mg, parse_mode=ParseMode.HTML)
+        os.remove('rankings.png')
+
+
+def percentages(update, context):
+    if update.message.chat_id == doobieID:
+        percentage_plot(context.chat_data['overall'], context.chat_data['overallDates'], 'percentages.png')
+        context.bot.send_photo(chat_id=update.message.chat_id, photo=open('percentages.png', 'rb'))
+        os.remove('percentages.png')
 
 
 def main():
@@ -858,6 +881,8 @@ def main():
     dp.add_handler(CommandHandler("total_time", total_time))
     dp.add_handler(CommandHandler("violin", violin))
     dp.add_handler(CommandHandler("swarm", swarm))
+    dp.add_handler(CommandHandler("rankings", rankings))
+    dp.add_handler(CommandHandler("percentages", percentages))
 
     # on noncommand i.e message - echo the message on Telegram
     # log all errors
