@@ -796,7 +796,7 @@ def stats(update, context):
     else:
         name = str(update.message.from_user.first_name)
     user_times = [t for t in context.chat_data['overall'][name] if t is not None]
-    sum_time = str(datetime.timedelta(seconds=sum(user_times)))
+    sum_time = str(timedelta(seconds=sum(user_times)))
     mean = statistics.mean(user_times)
     median = statistics.median(user_times)
     commonality = Counter(user_times).most_common()
@@ -822,7 +822,7 @@ def rankings(update, context):
         ranks = rankings_plot(context.chat_data['overall'], context.chat_data['overallDates'], 'rankings.png')
         mg = '<b>Ranked Rankings:</b>\n'
         for i, name in enumerate(sorted(ranks.keys(), key=ranks.get, reverse=True)):
-            mg += f'<b>{i+1}</b>{name}: {ranks[name]}'
+            mg += f'<b>{i+1}</b>{name}: {ranks[name]}\n'
         context.bot.send_photo(chat_id=update.message.chat_id, photo=open('rankings.png', 'rb'))
         context.bot.send_message(update.message.chat_id, mg, parse_mode=ParseMode.HTML)
         os.remove('rankings.png')
