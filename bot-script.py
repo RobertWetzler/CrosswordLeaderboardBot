@@ -834,7 +834,7 @@ def month_rankings(update, context):
 
         # Get month name for output message
         lds = [int(s) for s in context.chat_data['overallDates'][-1].split('/')]
-        last_date = datetime.datetime(year=int(lds[2]), month=int(lds[0]), day=int(lds[1]))
+        last_date = datetime(year=int(lds[2]), month=int(lds[0]), day=int(lds[1]))
         # Gets month name
         month = last_date.strftime("%B")
         mg = f'<b>Ranked Rankings for {month}:</b>\n'
