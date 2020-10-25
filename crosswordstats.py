@@ -221,10 +221,20 @@ def calendar_plot(overall_dict, dates, filename):
     plt.close('all')
 
 
-def total_wins_plot(overall_dict, dates, filename):
+def total_wins_plot(overall_dict, dates, filename, past_month=False):
     fig, ax = plt.subplots()
     wins_dict = {name: [] for name in overall_dict}
-    for day_index in range(len(dates)):
+    if past_month:
+        # (last date string)
+        lds = [int(s) for s in dates[-1].split('/')]
+        last_date = dt.datetime(year=int(lds[2]), month=int(lds[0]), day=int(lds[1]))
+        # first date of the month
+        first_date = dt.datetime(year=lds[2], month=lds[0], day=1)
+        delta = (last_date - first_date).days
+        start = len(dates) - delta
+    else:
+        start = 0
+    for day_index in range(len(dates[start:])):
         min_time = None
         min_names = []
         for name in overall_dict:
@@ -248,14 +258,21 @@ def total_wins_plot(overall_dict, dates, filename):
                 wins_dict[name].append(total)
 
     datetimes = [dt.datetime(int(date.split('/')[2]), int(date.split('/')[0]), int(date.split('/')[1])) for date in
-                 dates]
+                 dates[start:]]
     for name in wins_dict:
         plt.plot(datetimes, wins_dict[name], '-', label=name, ms=3)
     plt.gcf().autofmt_xdate()
     ax.xaxis.set_major_locator(mdates.AutoDateLocator())
     ax.xaxis.set_major_formatter(DateFormatter("%m-%d"))
     ax.yaxis.set_minor_locator(AutoMinorLocator())
-    plt.title("Cumulative Wins")
+    title = 'Cumulative Wins'
+    if past_month:
+        lds = [int(s) for s in dates[-1].split('/')]
+        last_date = dt.datetime(year=int(lds[2]), month=int(lds[0]), day=int(lds[1]))
+        # Gets month name
+        month = last_date.strftime("%B")
+        title += f' for {month}'
+    plt.title(title)
     plt.legend()
     plt.xlabel('Day')
     plt.ylabel('Wins')
@@ -323,11 +340,21 @@ def _update(num, *fargs):
     ax.set_title(dates[num])
 
 
-def total_time_plot(overall_dict, dates, filename):
+def total_time_plot(overall_dict, dates, filename, past_month=False):
     fig, ax = plt.subplots()
     times_dict = {name: [] for name in overall_dict}
+    if past_month:
+        # (last date string)
+        lds = [int(s) for s in dates[-1].split('/')]
+        last_date = dt.datetime(year=int(lds[2]), month=int(lds[0]), day=int(lds[1]))
+        # first date of the month
+        first_date = dt.datetime(year=lds[2], month=lds[0], day=1)
+        delta = (last_date - first_date).days
+        start = len(dates) - delta
+    else:
+        start = 0
     for name in overall_dict:
-        for day_index in range(len(dates)):
+        for day_index in range(len(dates[start:])):
             if overall_dict[name][day_index] is None:
                 times_dict[name].append(None)
             else:
@@ -361,7 +388,7 @@ def total_time_plot(overall_dict, dates, filename):
         times_dict[name].append(missed_day_sum)
 
     datetimes = [dt.datetime(int(date.split('/')[2]), int(date.split('/')[0]), int(date.split('/')[1])) for date in
-                 dates]
+                 dates[start:]]
     last_date = dates[-1]
     last_datetime = dt.datetime(int(last_date.split('/')[2]), int(last_date.split('/')[0]),
                                 int(last_date.split('/')[1]))
@@ -375,7 +402,14 @@ def total_time_plot(overall_dict, dates, filename):
     formatter = matplotlib.ticker.FuncFormatter(lambda s, y: str(dt.timedelta(seconds=s)))
     ax.yaxis.set_major_formatter(formatter)
     ax.yaxis.set_minor_locator(AutoMinorLocator())
-    plt.title(r"Cumulative Time (with Missed Days × Average Time appended)")
+    title = r'Cumulative Time (with Missed Days × Average Time appended)'
+    if past_month:
+        lds = [int(s) for s in dates[-1].split('/')]
+        last_date = dt.datetime(year=int(lds[2]), month=int(lds[0]), day=int(lds[1]))
+        # Gets month name
+        month = last_date.strftime("%B")
+        title += f' for {month}'
+    plt.title(title)
     plt.legend()
     plt.xlabel('Day')
     plt.ylabel('Time')

@@ -768,12 +768,26 @@ def total(update, context):
         os.remove('total.png')
 
 
+def month_total(update, context):
+    if update.message.chat_id == doobieID:
+        total_wins_plot(context.chat_data['overall'], context.chat_data['overallDates'], 'total.png', past_month=True)
+        context.bot.send_photo(chat_id=update.message.chat_id, photo=open('total.png', 'rb'))
+        os.remove('total.png')
+
+
 def total_time(update, context):
     if update.message.chat_id == doobieID:
         total_time_plot(context.chat_data['overall'], context.chat_data['overallDates'], 'total_time.png')
         context.bot.send_photo(chat_id=update.message.chat_id, photo=open('total_time.png', 'rb'))
         os.remove('total_time.png')
 
+
+def month_total_time(update, context):
+    if update.message.chat_id == doobieID:
+        total_time_plot(context.chat_data['overall'], context.chat_data['overallDates'], 'total_time.png',
+                        past_month=True)
+        context.bot.send_photo(chat_id=update.message.chat_id, photo=open('total_time.png', 'rb'))
+        os.remove('total_time.png')
 
 def violin(update, context):
     if update.message.chat_id == doobieID:
@@ -896,7 +910,9 @@ def main():
     dp.add_handler(CommandHandler("pie_gif", pie_gif))
     dp.add_handler(CommandHandler("stats", stats))
     dp.add_handler(CommandHandler("total", total))
+    dp.add_handler(CommandHandler("month_total", month_total))
     dp.add_handler(CommandHandler("total_time", total_time))
+    dp.add_handler(CommandHandler("month_total_time", month_total_time))
     dp.add_handler(CommandHandler("violin", violin))
     dp.add_handler(CommandHandler("swarm", swarm))
     dp.add_handler(CommandHandler("rankings", rankings))
