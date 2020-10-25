@@ -446,11 +446,20 @@ def swarm_plot(overall_dict, dates, filename):
     plt.close('all')
 
 
-def rankings_plot(overall_dict, dates, filename):
+def rankings_plot(overall_dict, dates, filename, past_month=False):
     fig, ax = plt.subplots()
     scores = [10, 8, 5, 3, 1]
     rank_dict = {name: [] for name in overall_dict}
-    for day_index in range(len(dates)):
+    start = 0
+    if past_month:
+        # (last date string)
+        lds = [int(s) for s in dates[-1].split('/')]
+        last_date = dt.datetime(year=int(lds[2]), month=int(lds[0]), day=int(lds[1]))
+        # first date of the month
+        first_date = dt.datetime(year=lds[2], month=lds[0], day=1)
+        delta = (last_date - first_date).days
+        start = len(dates) - delta
+    for day_index in range(len(dates[start:])):
         daily_rank = []
         did_not_play = []
         for name in overall_dict:
@@ -500,14 +509,21 @@ def rankings_plot(overall_dict, dates, filename):
             mg += f'{name}: {0} '
 
     datetimes = [dt.datetime(int(date.split('/')[2]), int(date.split('/')[0]), int(date.split('/')[1])) for date in
-                 dates]
+                 dates[start:]]
     for name in rank_dict:
         plt.plot(datetimes, rank_dict[name], '-', label=name, ms=3)
     plt.gcf().autofmt_xdate()
     ax.xaxis.set_major_locator(mdates.AutoDateLocator())
     ax.xaxis.set_major_formatter(DateFormatter("%m-%d"))
     ax.yaxis.set_minor_locator(AutoMinorLocator())
-    plt.title("Ranked Rankings")
+    title = 'Ranked rankings'
+    if past_month:
+        lds = [int(s) for s in dates[-1].split('/')]
+        last_date = dt.datetime(year=int(lds[2]), month=int(lds[0]), day=int(lds[1]))
+        # Gets month name
+        month = last_date.strftime("%B")
+        title += f' for {month}'
+    plt.title(title)
     plt.legend()
     plt.xlabel('Day')
     plt.ylabel('Wins')

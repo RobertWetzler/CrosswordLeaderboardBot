@@ -827,6 +827,24 @@ def rankings(update, context):
         context.bot.send_message(update.message.chat_id, mg, parse_mode=ParseMode.HTML)
         os.remove('rankings.png')
 
+def month_rankings(update, context):
+    if update.message.chat_id == doobieID:
+        ranks = rankings_plot(context.chat_data['overall'], context.chat_data['overallDates'], 'rankings.png',
+                              past_month=True)
+
+        # Get month name for output message
+        lds = [int(s) for s in context.chat_data['overallDates'][-1].split('/')]
+        last_date = datetime.datetime(year=int(lds[2]), month=int(lds[0]), day=int(lds[1]))
+        # Gets month name
+        month = last_date.strftime("%B")
+        mg = f'<b>Ranked Rankings for {month}:</b>\n'
+
+        for i, name in enumerate(sorted(ranks.keys(), key=ranks.get, reverse=True)):
+            mg += f'<b>{i+1}</b> {name}: {ranks[name]}\n'
+        context.bot.send_photo(chat_id=update.message.chat_id, photo=open('rankings.png', 'rb'))
+        context.bot.send_message(update.message.chat_id, mg, parse_mode=ParseMode.HTML)
+        os.remove('rankings.png')
+
 
 def percentages(update, context):
     if update.message.chat_id == doobieID:
@@ -882,6 +900,7 @@ def main():
     dp.add_handler(CommandHandler("violin", violin))
     dp.add_handler(CommandHandler("swarm", swarm))
     dp.add_handler(CommandHandler("rankings", rankings))
+    dp.add_handler(CommandHandler("month_rankings", month_rankings))
     dp.add_handler(CommandHandler("percentages", percentages))
 
     # on noncommand i.e message - echo the message on Telegram
