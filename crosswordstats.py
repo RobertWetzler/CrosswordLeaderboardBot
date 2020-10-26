@@ -234,7 +234,7 @@ def total_wins_plot(overall_dict, dates, filename, past_month=False):
         start = len(dates) - delta
     else:
         start = 0
-    for day_index in range(len(dates[start:])):
+    for day_index in range(start, len(dates)):
         min_time = None
         min_names = []
         for name in overall_dict:
@@ -354,7 +354,12 @@ def total_time_plot(overall_dict, dates, filename, past_month=False):
     else:
         start = 0
     for name in overall_dict:
-        for day_index in range(len(dates[start:])):
+        for day_index in range(start, len(dates)):
+            if overall_dict[name][day_index] is None:
+                times_dict[name].append(None)
+            else:
+                times_dict[name].append(sum(t for t in overall_dict[name][start:day_index + 1] if t is not None))
+            """ The following is poopcode, but its poopcode that should run in O(n)
             if overall_dict[name][day_index] is None:
                 times_dict[name].append(None)
             else:
@@ -363,13 +368,15 @@ def total_time_plot(overall_dict, dates, filename, past_month=False):
                     times_dict[name].append(current_sum)
                 else:
                     last_time_index = day_index - 1
-                    while last_time_index > 0 and times_dict[name][last_time_index] is None:
+                    print(f'Out loop {last_time_index}')
+                    while last_time_index >= start and times_dict[name][last_time_index-start] is None:
                         last_time_index -= 1
-                    if last_time_index > 0:
+                        print(f'In loop {last_time_index}')
+                    if last_time_index >= start:
                         current_sum += times_dict[name][last_time_index]
                     elif times_dict[name][0] is not None:
-                        current_sum += times_dict[name][0]
-                    times_dict[name].append(current_sum)
+                        current_sum += times_dict[name][start]
+                    times_dict[name].append(current_sum)"""
         missed_days = times_dict[name].count(None)
         times = [seconds for seconds in overall_dict[name] if seconds is not None]
         average = sum(times) / len(times)
@@ -493,7 +500,7 @@ def rankings_plot(overall_dict, dates, filename, past_month=False):
         first_date = dt.datetime(year=lds[2], month=lds[0], day=1)
         delta = (last_date - first_date).days
         start = len(dates) - delta
-    for day_index in range(len(dates[start:])):
+    for day_index in range(start, len(dates)):
         daily_rank = []
         did_not_play = []
         for name in overall_dict:
