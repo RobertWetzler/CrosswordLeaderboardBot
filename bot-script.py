@@ -867,6 +867,44 @@ def percentages(update, context):
         os.remove('percentages.png')
 
 
+def get_day(update, context):
+    if update.message.chat_id == doobieID or update.message.from_user.id == robertID:
+        date = update.message.text.split()[1]
+        message = ''
+        if date in context.chat_data['overallDates']:
+            i = context.chat_data['overallDates'].index(date)
+            for user in context.chat_data['overall']:
+                time = context.chat_data['overall'][user][i]
+                message += f'{user} - {time_to_string(time)}\n'
+        else:
+            message = f'Date {date} not found'
+        context.bot.send_message(message)
+
+def set_day(update, context):
+    if update.message.from_user.id == robertID:
+        date = update.message.text.split()[1]
+        lines = update.message.text.splitlines()
+        update.message.bot.send_message(str(lines))
+        message = ''
+        if date in context.chat_data['overallDates']:
+            message = 'ToDo'
+        else:
+            message = f'Date {date} already in list'
+        context.bot.send_message(message)
+
+def override_day(update, context):
+    if update.message.from_user.id == robertID:
+        date = update.message.text.split()[1]
+        lines = update.message.text.splitlines()
+        update.message.bot.send_message(str(lines))
+        message = ''
+        if date in context.chat_data['overallDates']:
+            message = 'ToDo'
+        else:
+            message = f'Date {date} already in list'
+        context.bot.send_message(message)
+
+
 def main():
     """Start the bot."""
     # Create the Updater and pass it your bot's token.
@@ -918,7 +956,9 @@ def main():
     dp.add_handler(CommandHandler("rankings", rankings))
     dp.add_handler(CommandHandler("month_rankings", month_rankings))
     dp.add_handler(CommandHandler("percentages", percentages))
-
+    dp.add_handler(CommandHandler("get_day", get_day))
+    dp.add_handler(CommandHandler("set_day", set_day))
+    dp.add_handler(CommandHandler("override_day", override_day))
     # on noncommand i.e message - echo the message on Telegram
     # log all errors
     dp.add_error_handler(error)
