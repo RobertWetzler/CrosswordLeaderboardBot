@@ -35,6 +35,7 @@ from crosswordstats import lineplot, avgtimes, lineplot_best, lineplot_best_fit,
 import os
 from collections import Counter
 import csv
+
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
@@ -882,29 +883,26 @@ def get_day(update, context):
             message = f'Date {date} not found'
         context.bot.send_message(message)
 
-def set_day(update, context):
-    if update.message.from_user.id == robertID:
-        date = update.message.text.split()[1]
-        lines = update.message.text.splitlines()
-        update.message.bot.send_message(str(lines))
-        global globalChatData
-        if date in globalChatData[doobieID]['overallDates']:
-            message = 'todo'
-        else:
-            message = f'Date {date} already in list'
-        context.bot.send_message(message)
 
-def override_day(update, context):
-    if update.message.from_user.id == robertID:
-        date = update.message.text.split()[1]
-        lines = update.message.text.splitlines()
-        update.message.bot.send_message(str(lines))
-        global globalChatData
-        if date in globalChatData[doobieID]['overallDates']:
-            message = 'todo'
-        else:
-            message = f'Date {date} already in list'
-        context.bot.send_message(message)
+def calculate_leaderboard(overall_dict, dates):
+    leaderboard = {name: 0 for name in overall_dict}
+    for day_index in range(len(dates)):
+        min_time = None
+        min_names = []
+        for name in overall_dict:
+            if overall_dict[name][day_index] is not None:
+                if min_time is None:
+                    min_time = overall_dict[name][day_index]
+                    min_names = [name]
+                elif overall_dict[name][day_index] < min_time:
+                    min_time = overall_dict[name][day_index]
+                    min_names = [name]
+                elif overall_dict[name][day_index] == min_time:
+                    min_names.append(name)
+        for name in min_names:
+            leaderboard[name] += 1
+    return leaderboard
+
 
 def write_csv(update, context):
     if update.message.from_user.id == doobieID or update.message.from_user.id == robertID:
@@ -920,6 +918,62 @@ def write_csv(update, context):
                     row.append(chat_data['overall'][name][i])
                 writer.writerow(row)
         context.bot.send_document(doobieID, document=open('crossword_times.csv', 'rb'))
+
+
+def read_csv(update, context):
+    if update.message.from_user.id == doobieID or update.message.from_user.id == robertID:
+        filename = 'crossword_times.csv'
+        if len(update.message.text.split()) > 1:
+            filename = update.message.text.split()[1]
+        overallDates = []
+        overall = {'Max': [], 'Macey': [], 'Asher': [], 'Robert': [], 'Levi': []}
+        with open(filename, newline='') as csvfile:
+            reader = csv.reader(csvfile, delimiter=',')
+            none_check = lambda t: int(t) if t != '' else None
+            for row in reader:
+                overallDates.append(row[0])
+                overall['Max'].append(none_check(row[1]))
+                overall['Macey'].append(none_check(row[2]))
+                overall['Asher'].append(none_check(row[3]))
+                overall['Robert'].append(none_check(row[4]))
+                overall['Levi'].append(none_check(row[5]))
+        calendar_plot(overall, overallDates, 'calendar.png')
+        context.bot.send_message(doobieID, 'Do these look correct? If so, use /overwrite_data_from_csv')
+        context.bot.send_photo(chat_id=doobieID, photo=open('calendar.png', 'rb'))
+        os.remove('calendar.png')
+
+        total_wins_plot(overall, overallDates, 'total.png')
+        context.bot.send_photo(chat_id=doobieID, photo=open('total.png', 'rb'))
+        os.remove('total.png')
+
+        leaderboard = calculate_leaderboard(overall, overallDates)
+        msg = 'Calculated Leaderboard:\n'
+        for name in leaderboard:
+            msg += f'{name}: {leaderboard[name]}\n'
+        context.bot.send_message(doobieID, msg)
+
+
+def overwrite_data_from_csv(update, context):
+    if update.message.from_user.id == robertID:
+        filename = 'crossword_times.csv'
+        if len(update.message.text.split()) > 1:
+            filename = update.message.text.split()[1]
+        overallDates = []
+        overall = {'Max': [], 'Macey': [], 'Asher': [], 'Robert': [], 'Levi': []}
+        with open(filename, newline='') as csvfile:
+            reader = csv.reader(csvfile, delimiter=',')
+            none_check = lambda t: int(t) if t != '' else None
+            for row in reader:
+                overallDates.append(row[0])
+                overall['Max'].append(none_check(row[1]))
+                overall['Macey'].append(none_check(row[2]))
+                overall['Asher'].append(none_check(row[3]))
+                overall['Robert'].append(none_check(row[4]))
+                overall['Levi'].append(none_check(row[5]))
+        context.chat_data['overall'] = overall
+        context.chat_data['overallDates'] = overallDates
+        context.chat_data['leaderboard'] = calculate_leaderboard(overall, overallDates)
+        context.bot.send_message(doobieID, "Data overwritten from CSV file. Please check accuracy.")
 
 
 def main():
@@ -974,9 +1028,9 @@ def main():
     dp.add_handler(CommandHandler("month_rankings", month_rankings))
     dp.add_handler(CommandHandler("percentages", percentages))
     dp.add_handler(CommandHandler("get_day", get_day))
-    dp.add_handler(CommandHandler("set_day", set_day))
-    dp.add_handler(CommandHandler("override_day", override_day))
     dp.add_handler(CommandHandler("write_csv", write_csv))
+    dp.add_handler(CommandHandler("read_csv", read_csv))
+    dp.add_handler(CommandHandler("overwrite_data_from_csv", overwrite_data_from_csv))
     # on noncommand i.e message - echo the message on Telegram
     # log all errors
     dp.add_error_handler(error)
