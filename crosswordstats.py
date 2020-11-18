@@ -209,7 +209,7 @@ def calendar_plot(overall_dict, dates, filename):
                 elif overall_dict[name][day_index] == min:
                     weight = 0
         daily_weights.append(weight)
-    datetimes = [dt.datetime(int(date.split('/')[2]), int(date.split('/')[0]), int(date.split('/')[1])) for date in
+    datetimes = [dt.datetime(year=int(date.split('/')[2]), month=int(date.split('/')[0]), day=int(date.split('/')[1])) for date in
                  dates]
     series = pd.Series(data=daily_weights, index=datetimes)
     cmap = matplotlib.colors.ListedColormap(['grey', 'skyblue', 'navajowhite', 'palegreen', 'lightcoral', 'plum'])
