@@ -930,7 +930,7 @@ def read_csv(update, context):
         with open(filename, newline='') as csvfile:
             reader = csv.reader(csvfile, delimiter=',')
             none_check = lambda t: int(t) if t != '' else None
-            for row in reader:
+            for row in list(reader)[1:]:
                 overallDates.append(row[0])
                 overall['Max'].append(none_check(row[1]))
                 overall['Macey'].append(none_check(row[2]))
@@ -963,7 +963,7 @@ def overwrite_data_from_csv(update, context):
         with open(filename, newline='') as csvfile:
             reader = csv.reader(csvfile, delimiter=',')
             none_check = lambda t: int(t) if t != '' else None
-            for row in reader:
+            for row in list(reader)[1:]:
                 overallDates.append(row[0])
                 overall['Max'].append(none_check(row[1]))
                 overall['Macey'].append(none_check(row[2]))
