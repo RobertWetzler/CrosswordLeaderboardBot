@@ -935,20 +935,24 @@ def read_csv(update, context):
                 overall['Asher'].append(none_check(row[3]))
                 overall['Robert'].append(none_check(row[4]))
                 overall['Levi'].append(none_check(row[5]))
-        calendar_plot(overall, overallDates, 'calendar.png')
-        context.bot.send_message(doobieID, 'Do these look correct? If so, use /overwrite_data_from_csv')
-        context.bot.send_photo(chat_id=doobieID, photo=open('calendar.png', 'rb'))
-        os.remove('calendar.png')
-
-        total_wins_plot(overall, overallDates, 'total.png')
-        context.bot.send_photo(chat_id=doobieID, photo=open('total.png', 'rb'))
-        os.remove('total.png')
 
         leaderboard = calculate_leaderboard(overall, overallDates)
         msg = 'Calculated Leaderboard:\n'
         for name in leaderboard:
             msg += f'{name}: {leaderboard[name]}\n'
         context.bot.send_message(doobieID, msg)
+
+        total_wins_plot(overall, overallDates, 'total.png')
+        context.bot.send_photo(chat_id=doobieID, photo=open('total.png', 'rb'))
+        os.remove('total.png')
+
+        calendar_plot(overall, overallDates, 'calendar.png')
+        context.bot.send_message(doobieID, 'Do these look correct? If so, use /overwrite_data_from_csv')
+        context.bot.send_photo(chat_id=doobieID, photo=open('calendar.png', 'rb'))
+        os.remove('calendar.png')
+
+
+
 
 
 def overwrite_data_from_csv(update, context):
