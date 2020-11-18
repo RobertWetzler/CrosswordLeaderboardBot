@@ -919,7 +919,7 @@ def write_csv(update, context):
                 for name in names:
                     row.append(chat_data['overall'][name][i])
                 writer.writerow(row)
-        context.bot.send_document(doobieID, document=open('crossword_time.csv', 'rb'))
+        context.bot.send_document(doobieID, document=open('crossword_times.csv', 'rb'))
 
 
 def main():
