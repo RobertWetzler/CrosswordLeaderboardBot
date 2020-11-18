@@ -923,8 +923,6 @@ def write_csv(update, context):
 def read_csv(update, context):
     if update.message.from_user.id == doobieID or update.message.from_user.id == robertID:
         filename = 'crossword_times.csv'
-        if len(update.message.text.split()) > 1:
-            filename = update.message.text.split()[1]
         overallDates = []
         overall = {'Max': [], 'Macey': [], 'Asher': [], 'Robert': [], 'Levi': []}
         with open(filename, newline='') as csvfile:
