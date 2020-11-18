@@ -871,7 +871,8 @@ def get_day(update, context):
     if update.message.chat_id == doobieID or update.message.from_user.id == robertID:
         date = update.message.text.split()[1]
         message = ''
-        if date in context.chat_data['overallDates']:
+        global globalChatData
+        if date in globalChatData[doobieID]['overallDates']:
             i = context.chat_data['overallDates'].index(date)
             for user in context.chat_data['overall']:
                 time = context.chat_data['overall'][user][i]
@@ -885,9 +886,9 @@ def set_day(update, context):
         date = update.message.text.split()[1]
         lines = update.message.text.splitlines()
         update.message.bot.send_message(str(lines))
-        message = ''
-        if date in context.chat_data['overallDates']:
-            message = 'ToDo'
+        global globalChatData
+        if date in globalChatData[doobieID]['overallDates']:
+            message = 'todo'
         else:
             message = f'Date {date} already in list'
         context.bot.send_message(message)
@@ -897,9 +898,9 @@ def override_day(update, context):
         date = update.message.text.split()[1]
         lines = update.message.text.splitlines()
         update.message.bot.send_message(str(lines))
-        message = ''
-        if date in context.chat_data['overallDates']:
-            message = 'ToDo'
+        global globalChatData
+        if date in globalChatData[doobieID]['overallDates']:
+            message = 'todo'
         else:
             message = f'Date {date} already in list'
         context.bot.send_message(message)
