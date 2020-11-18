@@ -932,7 +932,7 @@ def read_csv(update, context):
                 data = row[0].split('/')
                 if len(data[2]) == 2:
                     data[2] = '20' + data[2]
-                overallDates.append(f'{data[0]}/{data[1]/data[2]}')
+                overallDates.append(f'{data[0]}/{data[1]}/{data[2]}')
                 overall['Max'].append(none_check(row[1]))
                 overall['Macey'].append(none_check(row[2]))
                 overall['Asher'].append(none_check(row[3]))
@@ -972,7 +972,7 @@ def overwrite_data_from_csv(update, context):
                 data = row[0].split('/')
                 if len(data[2]) == 2:
                     data[2] = '20' + data[2]
-                overallDates.append(f'{data[0]}/{data[1] / data[2]}')
+                overallDates.append(f'{data[0]}/{data[1]}/{data[2]}')
                 overall['Max'].append(none_check(row[1]))
                 overall['Macey'].append(none_check(row[2]))
                 overall['Asher'].append(none_check(row[3]))
