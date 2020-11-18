@@ -34,6 +34,7 @@ from crosswordstats import lineplot, avgtimes, lineplot_best, lineplot_best_fit,
 
 import os
 from collections import Counter
+import csv
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
@@ -904,6 +905,21 @@ def override_day(update, context):
         else:
             message = f'Date {date} already in list'
         context.bot.send_message(message)
+
+def write_csv(update, context):
+    if update.message.from_user.id == doobieID or update.message.from_user.id == robertID:
+        chat_data = globalChatData[doobieID]
+        names = [name for name in chat_data['overall']]
+        header = ['Date'] + names
+        with open('crossword_times.csv', 'w') as fp:
+            writer = csv.writer(fp, delimiter=',')
+            writer.writerow(header)
+            for i in range(len(chat_data['overallDates'])):
+                row = [chat_data['overallDates'][i]]
+                for name in names:
+                    row.append(chat_data['overall'][name][i])
+                writer.writerow(row)
+        context.bot.send_document(doobieID, document=open('crossword_time.csv', 'rb'))
 
 
 def main():
