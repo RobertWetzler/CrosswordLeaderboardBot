@@ -821,6 +821,7 @@ def stats(update, context):
     variance = round(statistics.pvariance(user_times, mean), 2)
     stdev = round(statistics.pstdev(user_times, mean), 2)
     mean = round(mean, 2)
+    twenty_sixes = user_times.count(26)
 
     message = f'<b>Stats for {name}:</b>\n' \
               f'Total: {sum_time}\n'\
@@ -828,7 +829,8 @@ def stats(update, context):
               f'Median: {median} sec\n' \
               f'Mode: {", ".join(modes)} sec ({max_count} times)\n' \
               f'Variance: {variance} sec²\n' \
-              f'Standard Deviation: {stdev} sec'
+              f'Standard Deviation: {stdev} sec\n' \
+              f'Number of :26 times: {twenty_sixes}'
 
     update.message.reply_text(message, parse_mode=ParseMode.HTML)
 
