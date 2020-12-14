@@ -830,7 +830,7 @@ def stats(update, context):
               f'Mode: {", ".join(modes)} sec ({max_count} times)\n' \
               f'Variance: {variance} sec²\n' \
               f'Standard Deviation: {stdev} sec\n' \
-              f'Number of :26 times: {twenty_sixes}'
+              f'Number of :26 Times: {twenty_sixes}'
 
     update.message.reply_text(message, parse_mode=ParseMode.HTML)
 
