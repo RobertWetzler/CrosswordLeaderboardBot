@@ -231,7 +231,7 @@ def total_wins_plot(overall_dict, dates, filename, past_month=False):
         # first date of the month
         first_date = dt.datetime(year=lds[2], month=lds[0], day=1)
         delta = (last_date - first_date).days
-        start = len(dates) - delta
+        start = len(dates) - 1 - delta
     else:
         start = 0
     for day_index in range(start, len(dates)):
@@ -350,7 +350,7 @@ def total_time_plot(overall_dict, dates, filename, past_month=False):
         # first date of the month
         first_date = dt.datetime(year=lds[2], month=lds[0], day=1)
         delta = (last_date - first_date).days
-        start = len(dates) - delta
+        start = len(dates) - 1 - delta
     else:
         start = 0
     for name in overall_dict:
@@ -499,7 +499,7 @@ def rankings_plot(overall_dict, dates, filename, past_month=False):
         # first date of the month
         first_date = dt.datetime(year=lds[2], month=lds[0], day=1)
         delta = (last_date - first_date).days
-        start = len(dates) - delta
+        start = len(dates) - 1 - delta
     for day_index in range(start, len(dates)):
         daily_rank = []
         did_not_play = []
