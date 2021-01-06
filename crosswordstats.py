@@ -262,7 +262,10 @@ def total_wins_plot(overall_dict, dates, filename, past_month=False):
     for name in wins_dict:
         plt.plot(datetimes, wins_dict[name], '-', label=name, ms=3)
     plt.gcf().autofmt_xdate()
-    ax.xaxis.set_major_locator(mdates.AutoDateLocator())
+    if len(datetimes) <= 5:
+        ax.xaxis.set_major_locator(mdates.DayLocator())
+    else:
+        ax.xaxis.set_major_locator(mdates.AutoDateLocator())
     ax.xaxis.set_major_formatter(DateFormatter("%m-%d"))
     ax.yaxis.set_minor_locator(AutoMinorLocator())
     title = 'Cumulative Wins'
@@ -380,15 +383,11 @@ def total_time_plot(overall_dict, dates, filename, past_month=False):
         missed_days = times_dict[name].count(None)
         times = [seconds for seconds in overall_dict[name] if seconds is not None]
         average = sum(times) / len(times)
-        print(f'{name} -  Average: {average}')
-        print(f'{name} -  Missed Days: {missed_days}')
         missed_day_sum = missed_days * average
-        print(f'{name} -  Missed Days * Average: {missed_day_sum}')
         last_time_index = len(times_dict[name]) - 1
         while last_time_index > 0 and times_dict[name][last_time_index] is None:
             last_time_index -= 1
         if last_time_index > 0:
-            print(f'{name} -  Last Sum: {times_dict[name][last_time_index]}')
             missed_day_sum += times_dict[name][last_time_index]
         elif times_dict[name][0] is not None:
             missed_day_sum += times_dict[name][0]
@@ -404,7 +403,10 @@ def total_time_plot(overall_dict, dates, filename, past_month=False):
     for name in times_dict:
         plt.plot(datetimes, times_dict[name], '.-', label=name, ms=3)
     plt.gcf().autofmt_xdate()
-    ax.xaxis.set_major_locator(mdates.AutoDateLocator())
+    if len(datetimes) <= 5:
+        ax.xaxis.set_major_locator(mdates.DayLocator())
+    else:
+        ax.xaxis.set_major_locator(mdates.AutoDateLocator())
     ax.xaxis.set_major_formatter(DateFormatter("%m-%d"))
     formatter = matplotlib.ticker.FuncFormatter(lambda s, y: str(dt.timedelta(seconds=s)))
     ax.yaxis.set_major_formatter(formatter)
@@ -464,20 +466,29 @@ def violin_plot(overall_dict, dates, filename):
     plt.close('all')
 
 
-def swarm_plot(overall_dict, dates, filename):
+def swarm_plot(overall_dict, dates, filename, past_month=False):
     fig, ax = plt.subplots(figsize=(12, 5))
     plt.title('Swarm Plot')
     sns.set(style='whitegrid', color_codes=True)
+    start = 0
+    if past_month:
+        # (last date string)
+        lds = [int(s) for s in dates[-1].split('/')]
+        last_date = dt.datetime(year=int(lds[2]), month=int(lds[0]), day=int(lds[1]))
+        # first date of the month
+        first_date = dt.datetime(year=lds[2], month=lds[0], day=1)
+        delta = (last_date - first_date).days
+        start = len(dates) - 1 - delta
     # Create name column
     # List of each name * number of items stored under that name
-    name_col = list(itertools.chain.from_iterable([[n] * len(overall_dict[n]) for n in overall_dict]))
+    name_col = list(itertools.chain.from_iterable([[n] * len(overall_dict[n][start:]) for n in overall_dict]))
     # Create time column
-    time_col = [t for n in overall_dict for t in overall_dict[n]]
+    time_col = [t for n in overall_dict for t in overall_dict[n][start:]]
     # Create saturday column
-    datetimes = [dt.datetime.strptime(d, '%m/%d/%Y').date() for d in dates]
+    datetimes = [dt.datetime.strptime(d, '%m/%d/%Y').date() for d in dates[start:]]
     saturday_col = ['Yes' if d.weekday() == 5 else 'No' for d in datetimes * len(overall_dict)]
     data = pd.DataFrame(data={'Name': name_col, 'Time': time_col, 'Saturday': saturday_col})
-    # Create violin plot
+    # Create swarm plot
     sns_plot = sns.swarmplot(x='Name', y='Time', hue='Saturday', data=data, size=3)
     formatter = matplotlib.ticker.FuncFormatter(lambda s, y: time.strftime('%M:%S', time.gmtime(s)))
     ax.yaxis.set_major_formatter(formatter)
@@ -554,7 +565,11 @@ def rankings_plot(overall_dict, dates, filename, past_month=False):
     for name in rank_dict:
         plt.plot(datetimes, rank_dict[name], '-', label=name, ms=3)
     plt.gcf().autofmt_xdate()
-    ax.xaxis.set_major_locator(mdates.AutoDateLocator())
+    # Avoid duplicate day ticks
+    if len(datetimes) <= 5:
+        ax.xaxis.set_major_locator(mdates.DayLocator())
+    else:
+        ax.xaxis.set_major_locator(mdates.AutoDateLocator())
     ax.xaxis.set_major_formatter(DateFormatter("%m-%d"))
     ax.yaxis.set_minor_locator(AutoMinorLocator())
     title = 'Ranked rankings'
@@ -567,7 +582,7 @@ def rankings_plot(overall_dict, dates, filename, past_month=False):
     plt.title(title)
     plt.legend()
     plt.xlabel('Day')
-    plt.ylabel('Wins')
+    plt.ylabel('Rank')
     plt.grid(b=True, which='both')
     plt.savefig(filename, dpi=500)
     plt.close('all')

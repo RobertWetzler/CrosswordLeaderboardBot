@@ -805,6 +805,13 @@ def swarm(update, context):
         os.remove('swarm.png')
 
 
+def month_swarm(update, context):
+    if update.message.chat_id == doobieID:
+        swarm_plot(context.chat_data['overall'], context.chat_data['overallDates'], 'swarm.png', past_month=True)
+        context.bot.send_photo(chat_id=update.message.chat_id, photo=open('swarm.png', 'rb'))
+        os.remove('swarm.png')
+
+
 def stats(update, context):
     command = update.message.text.split()
     if len(command) > 1 and command[1] in context.chat_data['overall']:
@@ -844,6 +851,7 @@ def rankings(update, context):
         context.bot.send_photo(chat_id=update.message.chat_id, photo=open('rankings.png', 'rb'))
         context.bot.send_message(update.message.chat_id, mg, parse_mode=ParseMode.HTML)
         os.remove('rankings.png')
+
 
 def month_rankings(update, context):
     if update.message.chat_id == doobieID:
@@ -1026,7 +1034,7 @@ def main():
     dp.add_handler(CommandHandler("week_best_fit", week_best_fit))
     dp.add_handler(CommandHandler("calendar", calendar))
     dp.add_handler(CommandHandler("pie", pie))
-    dp.add_handler(CommandHandler("pie_gif", pie_gif))
+    #dp.add_handler(CommandHandler("pie_gif", pie_gif))
     dp.add_handler(CommandHandler("stats", stats))
     dp.add_handler(CommandHandler("total", total))
     dp.add_handler(CommandHandler("month_total", month_total))
@@ -1034,6 +1042,7 @@ def main():
     dp.add_handler(CommandHandler("month_total_time", month_total_time))
     dp.add_handler(CommandHandler("violin", violin))
     dp.add_handler(CommandHandler("swarm", swarm))
+    dp.add_handler(CommandHandler("month_swarm", month_swarm))
     dp.add_handler(CommandHandler("rankings", rankings))
     dp.add_handler(CommandHandler("month_rankings", month_rankings))
     dp.add_handler(CommandHandler("percentages", percentages))
