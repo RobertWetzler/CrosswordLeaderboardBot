@@ -33,7 +33,7 @@ Plots the best fit curve for a given user to a given degree. Good for seeing tre
 ![BestFit](/images/best_fit.jpg)
 
 ### Percentage Plot
-Plots the percent of total wins each user has over time. Good for seeing trends in user's competing hold over their place in the leaderboard. (usage: /percentages)
+Plots the percent of total wins each user has over time. Good for seeing trends in users' competing hold over their place in the leaderboard. (usage: /percentages)
 
 ![Percentages](/images/percentages.jpg)
 
