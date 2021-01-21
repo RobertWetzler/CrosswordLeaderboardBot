@@ -34,7 +34,7 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
 
 logger = logging.getLogger(__name__)
 
-config.admin_id = ***REMOVED***
+config.admin_id = 210183844
 # config.group_id = 's1392971649'
 globalChatData = dict()
 
