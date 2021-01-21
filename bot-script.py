@@ -1,16 +1,7 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-# This program is dedicated to the public domain under the CC0 license.
 
 """
-Simple Bot to reply to Telegram messages.
-First, a few handler functions are defined. Then, those functions are passed to
-the Dispatcher and registered at their respective places.
-Then, the bot is started and runs until we press Ctrl-C on the command line.
-Usage:
-Basic Echobot example, repeats messages.
-Press Ctrl-C on the command line or send a signal to the process to stop the
-bot.
+Crossword Leaderboard Bot
+Pending future changes, all logic is currently tied to only work with our specific groupchat.
 """
 
 import logging
@@ -35,6 +26,7 @@ from crosswordstats import lineplot, avgtimes, lineplot_best, lineplot_best_fit,
 import os
 from collections import Counter
 import csv
+import config
 
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -42,16 +34,15 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
 
 logger = logging.getLogger(__name__)
 
-robertID = ***REMOVED***
-# doobieID = 's1392971649'
-doobieID = ***REMOVED***
+config.admin_id = ***REMOVED***
+# config.group_id = 's1392971649'
 globalChatData = dict()
 
 
 # Define a few command handlers. These usually take the two arguments update and
 # context. Error handlers also receive the raised TelegramError object in error.
 def start(update, context):
-    if update.message.chat_id == doobieID:
+    if update.message.chat_id == config.group_id:
         """Send a message when the command /start is issued."""
         if not ("leaderboard" in context.chat_data):
             context.chat_data["leaderboard"] = {}
@@ -72,11 +63,11 @@ def help(update, context):
 def error(update, context):
     """Log Errors caused by Updates."""
     logger.warning('Update "%s" caused error "%s". Chat data: %s', update, context.error, context.chat_data)
-    context.bot.send_message(doobieID, str(context.error))
+    context.bot.send_message(config.group_id, str(context.error))
 
 
 def reset(update, context):
-    if update.message.chat_id == doobieID:
+    if update.message.chat_id == config.group_id:
         mg = update.message.text.partition(' ')[2].partition(' ')
         name = mg[0]
         num = mg[2]
@@ -91,18 +82,23 @@ def reset(update, context):
 
 
 def initoverall(update, context):
-    if update.message.chat_id == doobieID:
+    if update.message.chat_id == config.group_id:
         if 'overall' not in context.chat_data or update.message.text.partition(' ')[2] == 'override':
             context.chat_data['overall'] = dict()
-            context.chat_data['overall']['Max'] = [30, 559, 24, 70, 39, 26, 16, 30, 15, 33, 65, 22, 29, 38, 43, 16, 23, 29,
+            context.chat_data['overall']['Max'] = [30, 559, 24, 70, 39, 26, 16, 30, 15, 33, 65, 22, 29, 38, 43, 16, 23,
+                                                   29,
                                                    32, 24, 23, 50, 31, 23]
-            context.chat_data['overall']['Macey'] = [None, 34, 40, None, 35, 60, 33, 37, 35, 49, 65, 27, None, 19, 44, 21,
+            context.chat_data['overall']['Macey'] = [None, 34, 40, None, 35, 60, 33, 37, 35, 49, 65, 27, None, 19, 44,
+                                                     21,
                                                      48, 48, 30, 33, 25, 38, 36, 56]
-            context.chat_data['overall']['Asher'] = [71, 124, 40, None, 58, 99, 39, None, 33, 32, 85, 24, 40, 30, 39, 40,
+            context.chat_data['overall']['Asher'] = [71, 124, 40, None, 58, 99, 39, None, 33, 32, 85, 24, 40, 30, 39,
+                                                     40,
                                                      None, 51, None, 23, 24, 69, 66, 80]
-            context.chat_data['overall']['Robert'] = [192, 101, 36, None, 111, 62, 51, 225, 78, 251, 149, 42, 97, 53, 206,
+            context.chat_data['overall']['Robert'] = [192, 101, 36, None, 111, 62, 51, 225, 78, 251, 149, 42, 97, 53,
+                                                      206,
                                                       32, 130, 72, 90, 43, 56, 263, 110, 312]
-            context.chat_data['overall']['Levi'] = [None, 238, 180, None, 256, None, None, None, 54, 61, 116, None, 86, 69,
+            context.chat_data['overall']['Levi'] = [None, 238, 180, None, 256, None, None, None, 54, 61, 116, None, 86,
+                                                    69,
                                                     50, 50, None, None, 102, 36, 35, None, 192, 110]
             context.chat_data['overallDates'] = list()
             for i in range(1, 26):
@@ -117,7 +113,7 @@ def initoverall(update, context):
 
 
 def addtime(update, context):
-    if update.message.chat_id == doobieID:
+    if update.message.chat_id == config.group_id:
         key = str(update.message.from_user.first_name)
         value = (update.message.text.partition(' ')[2]).partition(':')
         if len(value[2]) == 0:
@@ -143,7 +139,7 @@ def addtime(update, context):
 
 
 def debugtime(update, context):
-    if update.message.chat_id == doobieID:
+    if update.message.chat_id == config.group_id:
         msg = update.message.text.split()
         index = int(msg[1]) - 1
         for i in range(2, len(msg)):
@@ -154,12 +150,12 @@ def debugtime(update, context):
 
 
 def testVar(update, context):
-    if update.message.chat_id == doobieID:
+    if update.message.chat_id == config.group_id:
         update.message.reply_text(str(globalChatData))
 
 
 def times(update, context):
-    if update.message.chat_id == doobieID:
+    if update.message.chat_id == config.group_id:
         topStr = context.args[0]
         daysBack = context.args[1]
         top = None
@@ -176,7 +172,7 @@ def times(update, context):
 
 
 def stats_best(update, context):
-    if update.message.chat_id == doobieID:
+    if update.message.chat_id == config.group_id:
         topStr = update.message.text.partition(' ')[2]
         top = None
         if len(topStr) > 0:
@@ -187,7 +183,7 @@ def stats_best(update, context):
 
 
 def stats_best_fit(update, context):
-    if update.message.chat_id == doobieID:
+    if update.message.chat_id == config.group_id:
         name = context.args[0]
         degree = context.args[1]
         lineplot_best_fit(context.chat_data['overall'], context.chat_data['overallDates'], 'bestFitPlot.png', name,
@@ -197,31 +193,32 @@ def stats_best_fit(update, context):
 
 
 def week_best_fit(update, context):
-    if update.message.chat_id == doobieID:
+    if update.message.chat_id == config.group_id:
         name = context.args[0]
         degree = context.args[1]
-        lineplot_best_fit_week(context.chat_data['overall'], context.chat_data['overallDates'], 'bestFitPlotWeek.png', name,
+        lineplot_best_fit_week(context.chat_data['overall'], context.chat_data['overallDates'], 'bestFitPlotWeek.png',
+                               name,
                                int(degree))
         context.bot.send_photo(chat_id=update.message.chat_id, photo=open('bestFitPlotWeek.png', 'rb'))
         os.remove('bestFitPlotWeek.png')
 
 
 def averages(update, context):
-    if update.message.chat_id == doobieID:
+    if update.message.chat_id == config.group_id:
         avgtimes(context.chat_data['overall'], context.chat_data['overallDates'], 'avgBars.png')
         context.bot.send_photo(chat_id=update.message.chat_id, photo=open('avgBars.png', 'rb'))
         os.remove('avgBars.png')
 
 
 def calendar(update, context):
-    if update.message.chat_id == doobieID:
+    if update.message.chat_id == config.group_id:
         calendar_plot(context.chat_data['overall'], context.chat_data['overallDates'], 'calendar.png')
         context.bot.send_photo(chat_id=update.message.chat_id, photo=open('calendar.png', 'rb'))
         os.remove('calendar.png')
 
 
 def addtime_msg(update, context):
-    if update.message.chat_id == doobieID:
+    if update.message.chat_id == config.group_id:
         name = str(update.message.from_user.first_name)
         value = (update.message.text.partition(':'))
         user_id = update.message.from_user.id
@@ -318,7 +315,7 @@ def addtime_msg(update, context):
 
 
 def mytime(update, context):
-    if update.message.chat_id == doobieID:
+    if update.message.chat_id == config.group_id:
         key = str(update.message.from_user.first_name)
         time = context.chat_data['daily'][key]
         if key in context.chat_data['daily']:
@@ -328,17 +325,17 @@ def mytime(update, context):
 
 
 def dailytimes_manual(update, context):
-    if update.message.chat_id == doobieID:
+    if update.message.chat_id == config.group_id:
         dailytimes_job(context)
 
 
 def removeLastDate(update, context):
-    if update.message.chat_id == doobieID:
+    if update.message.chat_id == config.group_id:
         context.chat_data['overallDates'].pop()
 
 
 def removeLastTime(update, context):
-    if update.message.chat_id == doobieID:
+    if update.message.chat_id == config.group_id:
         for name in context.chat_data['overall']:
             context.chat_data['overall'][name].pop()
 
@@ -346,7 +343,7 @@ def removeLastTime(update, context):
 def dailytimes_job(context):
     global globalChatData
     for chatID in globalChatData:
-        if chatID == doobieID:
+        if chatID == config.group_id:
             rank = []
             dailyTimes = globalChatData[chatID]['daily']
             for name, time in dailyTimes.items():
@@ -474,7 +471,7 @@ def dailytimes_job(context):
 
 
 def currentstandings(update, context):
-    if update.message.chat_id == doobieID:
+    if update.message.chat_id == config.group_id:
         rank = []
         dailyTimes = context.chat_data['daily']
         for name, time in dailyTimes.items():
@@ -520,7 +517,8 @@ def currentstandings(update, context):
             if len(context.chat_data['daily']) == 1 or not ('pinnedStandings' in context.chat_data):
                 context.chat_data['pinnedStandings'] = context.bot.send_message(update.message.chat_id, mg,
                                                                                 parse_mode=ParseMode.HTML)
-                context.bot.pinChatMessage(update.message.chat_id, context.chat_data['pinnedStandings'].message_id, True)
+                context.bot.pinChatMessage(update.message.chat_id, context.chat_data['pinnedStandings'].message_id,
+                                           True)
             else:
                 context.bot.edit_message_text(mg, chat_id=update.message.chat_id,
                                               message_id=context.chat_data['pinnedStandings'].message_id,
@@ -528,7 +526,7 @@ def currentstandings(update, context):
 
 
 def currentstandings_manual(update, context):
-    if update.message.chat_id == doobieID:
+    if update.message.chat_id == config.group_id:
         rank = []
         dailyTimes = context.chat_data['daily']
         for name, time in dailyTimes.items():
@@ -569,12 +567,13 @@ def currentstandings_manual(update, context):
                         elif context.chat_data['streaks'][name] > 1:
                             streak = str(context.chat_data['streaks'][name] + 1).translate(sup)
                             streak = x + streak
-                    mg = mg + "\n" + str(place) + " " + name + streak + " - " + str(int(time / 60)) + ":" + seconds + " "
+                    mg = mg + "\n" + str(place) + " " + name + streak + " - " + str(
+                        int(time / 60)) + ":" + seconds + " "
             update.message.reply_text(mg, parse_mode=ParseMode.HTML)
 
 
 def leaderboard(update, context):
-    if update.message.chat_id == doobieID:
+    if update.message.chat_id == config.group_id:
         totalRank = []
         for name in context.chat_data['leaderboard']:
             if len(totalRank) == 0:
@@ -622,45 +621,32 @@ def leaderboard(update, context):
         audio = gTTS(text=mg, lang='en', slow=False)
         gTTS()
         audio.save("leaderboard.ogg")
-        context.bot.send_voice(chat_id=doobieID, voice=open('leaderboard.ogg', 'rb'))
+        context.bot.send_voice(chat_id=config.group_id, voice=open('leaderboard.ogg', 'rb'))
         os.remove("leaderboard.ogg")
 
-
-def insultmax(update, context):
-    insults = ["Max sux", "Max is a doodee poopoo head", "Ew", "Did someone just fart? Oh nevermind, it was Max",
-               "Max sucks at crossword", "Max is a poop poop poopy poop poop doodoodoodoodoodoodoo fart."]
-    if str(update.message.from_user.first_name) == "Max":
-        mg = "Wow great job entering that command there Max. I know that was you and not someone else. I'm not " \
-             "stupid, like you. ***REMOVED*** you."
-    else:
-        mg = insults[random.randrange(5)]
-    audio = gTTS(text=mg, lang='en', slow=False)
-    audio.save("max.ogg")
-    context.bot.send_voice(chat_id=doobieID, voice=open('max.ogg', 'rb'))
-    os.remove("max.ogg")
 
 
 def talk(update, context):
     mg = update.message.text.partition(' ')[2]
     audio = gTTS(text=mg, lang='en', slow=False)
     audio.save("talk.ogg")
-    context.bot.send_voice(chat_id=doobieID, voice=open('talk.ogg', 'rb'))
+    context.bot.send_voice(chat_id=config.group_id, voice=open('talk.ogg', 'rb'))
     os.remove("talk.ogg")
 
 
 def sendJob(context):
-    context.bot.send_message(robertID, "Job sent")
+    context.bot.send_message(config.admin_id, "Job sent")
 
 
 def sendVar(update, context):
     global globalChatData
     for chatID in globalChatData:
-        if chatID == doobieID:
+        if chatID == config.group_id:
             context.bot.send_message(chatID, str(globalChatData[chatID]))
 
 
 def minTimes(update, context):
-    if update.message.chat_id == doobieID:
+    if update.message.chat_id == config.group_id:
         best_times(context.chat_data['minTimes'], 'best_times.png')
         context.bot.send_photo(chat_id=update.message.chat_id, photo=open('best_times.png', 'rb'))
         os.remove('best_times.png')
@@ -712,7 +698,8 @@ def remind(context):
     for chatID in globalChatData:
         if 'ids' in globalChatData[chatID]:
             for user_id in globalChatData[chatID]['ids']:
-                if not globalChatData[chatID]['ids'][user_id]['Received'] and globalChatData[chatID]['ids'][user_id]['Remind']:
+                if not globalChatData[chatID]['ids'][user_id]['Received'] and globalChatData[chatID]['ids'][user_id][
+                    'Remind']:
                     context.bot.send_message(user_id, "Reminder: You have one hour to submit your crossword time! Use "
                                                       "/stop_reminders to stop getting this reminder.")
 
@@ -742,7 +729,7 @@ def send_reminders(update, context):
 
 
 def reset_streak(update, context):
-    if update.message.chat_id == doobieID:
+    if update.message.chat_id == config.group_id:
         initial_value = context.chat_data['streaks'][context.args[0]]
         context.chat_data['streaks'][context.args[0]] = int(context.args[1])
         update.message.reply_text(
@@ -750,63 +737,64 @@ def reset_streak(update, context):
 
 
 def pie(update, context):
-    if update.message.chat_id == doobieID:
+    if update.message.chat_id == config.group_id:
         pie_plot(context.chat_data['leaderboard'], 'pie.png')
         context.bot.send_photo(chat_id=update.message.chat_id, photo=open('pie.png', 'rb'))
         os.remove('pie.png')
 
 
 def pie_gif(update, context):
-    if update.message.chat_id == doobieID:
+    if update.message.chat_id == config.group_id:
         pie_time_plot(context.chat_data['overall'], context.chat_data['overallDates'], 'pie.gif')
         context.bot.send_animation(chat_id=update.message.chat_id, animation=open('pie.gif', 'rb'))
         os.remove('pie.gif')
 
 
 def total(update, context):
-    if update.message.chat_id == doobieID:
+    if update.message.chat_id == config.group_id:
         total_wins_plot(context.chat_data['overall'], context.chat_data['overallDates'], 'total.png')
         context.bot.send_photo(chat_id=update.message.chat_id, photo=open('total.png', 'rb'))
         os.remove('total.png')
 
 
 def month_total(update, context):
-    if update.message.chat_id == doobieID:
+    if update.message.chat_id == config.group_id:
         total_wins_plot(context.chat_data['overall'], context.chat_data['overallDates'], 'total.png', past_month=True)
         context.bot.send_photo(chat_id=update.message.chat_id, photo=open('total.png', 'rb'))
         os.remove('total.png')
 
 
 def total_time(update, context):
-    if update.message.chat_id == doobieID:
+    if update.message.chat_id == config.group_id:
         total_time_plot(context.chat_data['overall'], context.chat_data['overallDates'], 'total_time.png')
         context.bot.send_photo(chat_id=update.message.chat_id, photo=open('total_time.png', 'rb'))
         os.remove('total_time.png')
 
 
 def month_total_time(update, context):
-    if update.message.chat_id == doobieID:
+    if update.message.chat_id == config.group_id:
         total_time_plot(context.chat_data['overall'], context.chat_data['overallDates'], 'total_time.png',
                         past_month=True)
         context.bot.send_photo(chat_id=update.message.chat_id, photo=open('total_time.png', 'rb'))
         os.remove('total_time.png')
 
+
 def violin(update, context):
-    if update.message.chat_id == doobieID:
+    if update.message.chat_id == config.group_id:
         violin_plot(context.chat_data['overall'], context.chat_data['overallDates'], 'violin.png')
         context.bot.send_photo(chat_id=update.message.chat_id, photo=open('violin.png', 'rb'))
         os.remove('violin.png')
 
 
 def swarm(update, context):
-    if update.message.chat_id == doobieID:
+    if update.message.chat_id == config.group_id:
         swarm_plot(context.chat_data['overall'], context.chat_data['overallDates'], 'swarm.png')
         context.bot.send_photo(chat_id=update.message.chat_id, photo=open('swarm.png', 'rb'))
         os.remove('swarm.png')
 
 
 def month_swarm(update, context):
-    if update.message.chat_id == doobieID:
+    if update.message.chat_id == config.group_id:
         swarm_plot(context.chat_data['overall'], context.chat_data['overallDates'], 'swarm.png', past_month=True)
         context.bot.send_photo(chat_id=update.message.chat_id, photo=open('swarm.png', 'rb'))
         os.remove('swarm.png')
@@ -831,7 +819,7 @@ def stats(update, context):
     twenty_sixes = user_times.count(26)
 
     message = f'<b>Stats for {name}:</b>\n' \
-              f'Total: {sum_time}\n'\
+              f'Total: {sum_time}\n' \
               f'Mean: {mean} sec\n' \
               f'Median: {median} sec\n' \
               f'Mode: {", ".join(modes)} sec ({max_count} times)\n' \
@@ -843,18 +831,18 @@ def stats(update, context):
 
 
 def rankings(update, context):
-    if update.message.chat_id == doobieID:
+    if update.message.chat_id == config.group_id:
         ranks = rankings_plot(context.chat_data['overall'], context.chat_data['overallDates'], 'rankings.png')
         mg = '<b>Ranked Rankings:</b>\n'
         for i, name in enumerate(sorted(ranks.keys(), key=ranks.get, reverse=True)):
-            mg += f'<b>{i+1}</b> {name}: {ranks[name]}\n'
+            mg += f'<b>{i + 1}</b> {name}: {ranks[name]}\n'
         context.bot.send_photo(chat_id=update.message.chat_id, photo=open('rankings.png', 'rb'))
         context.bot.send_message(update.message.chat_id, mg, parse_mode=ParseMode.HTML)
         os.remove('rankings.png')
 
 
 def month_rankings(update, context):
-    if update.message.chat_id == doobieID:
+    if update.message.chat_id == config.group_id:
         ranks = rankings_plot(context.chat_data['overall'], context.chat_data['overallDates'], 'rankings.png',
                               past_month=True)
 
@@ -866,25 +854,25 @@ def month_rankings(update, context):
         mg = f'<b>Ranked Rankings for {month}:</b>\n'
 
         for i, name in enumerate(sorted(ranks.keys(), key=ranks.get, reverse=True)):
-            mg += f'<b>{i+1}</b> {name}: {ranks[name]}\n'
+            mg += f'<b>{i + 1}</b> {name}: {ranks[name]}\n'
         context.bot.send_photo(chat_id=update.message.chat_id, photo=open('rankings.png', 'rb'))
         context.bot.send_message(update.message.chat_id, mg, parse_mode=ParseMode.HTML)
         os.remove('rankings.png')
 
 
 def percentages(update, context):
-    if update.message.chat_id == doobieID:
+    if update.message.chat_id == config.group_id:
         percentage_plot(context.chat_data['overall'], context.chat_data['overallDates'], 'percentages.png')
         context.bot.send_photo(chat_id=update.message.chat_id, photo=open('percentages.png', 'rb'))
         os.remove('percentages.png')
 
 
 def get_day(update, context):
-    if update.message.chat_id == doobieID or update.message.from_user.id == robertID:
+    if update.message.chat_id == config.group_id or update.message.from_user.id == config.admin_id:
         date = update.message.text.split()[1]
         message = ''
         global globalChatData
-        if date in globalChatData[doobieID]['overallDates']:
+        if date in globalChatData[config.group_id]['overallDates']:
             i = context.chat_data['overallDates'].index(date)
             for user in context.chat_data['overall']:
                 time = context.chat_data['overall'][user][i]
@@ -915,8 +903,8 @@ def calculate_leaderboard(overall_dict, dates):
 
 
 def write_csv(update, context):
-    if update.message.from_user.id == doobieID or update.message.from_user.id == robertID:
-        chat_data = globalChatData[doobieID]
+    if update.message.from_user.id == config.group_id or update.message.from_user.id == config.admin_id:
+        chat_data = globalChatData[config.group_id]
         names = [name for name in chat_data['overall']]
         header = ['Date'] + names
         with open('crossword_times.csv', 'w') as fp:
@@ -927,11 +915,11 @@ def write_csv(update, context):
                 for name in names:
                     row.append(chat_data['overall'][name][i])
                 writer.writerow(row)
-        context.bot.send_document(doobieID, document=open('crossword_times.csv', 'rb'))
+        context.bot.send_document(config.group_id, document=open('crossword_times.csv', 'rb'))
 
 
 def read_csv(update, context):
-    if update.message.from_user.id == doobieID or update.message.from_user.id == robertID:
+    if update.message.from_user.id == config.group_id or update.message.from_user.id == config.admin_id:
         filename = 'crossword_times.csv'
         overallDates = []
         overall = {'Max': [], 'Macey': [], 'Asher': [], 'Robert': [], 'Levi': []}
@@ -953,23 +941,20 @@ def read_csv(update, context):
         msg = 'Calculated Leaderboard:\n'
         for name in leaderboard:
             msg += f'{name}: {leaderboard[name]}\n'
-        context.bot.send_message(doobieID, msg)
+        context.bot.send_message(config.group_id, msg)
 
         total_wins_plot(overall, overallDates, 'total.png')
-        context.bot.send_photo(chat_id=doobieID, photo=open('total.png', 'rb'))
+        context.bot.send_photo(chat_id=config.group_id, photo=open('total.png', 'rb'))
         os.remove('total.png')
 
         calendar_plot(overall, overallDates, 'calendar.png')
-        context.bot.send_message(doobieID, 'Do these look correct? If so, use /overwrite_data_from_csv')
-        context.bot.send_photo(chat_id=doobieID, photo=open('calendar.png', 'rb'))
+        context.bot.send_message(config.group_id, 'Do these look correct? If so, use /overwrite_data_from_csv')
+        context.bot.send_photo(chat_id=config.group_id, photo=open('calendar.png', 'rb'))
         os.remove('calendar.png')
 
 
-
-
-
 def overwrite_data_from_csv(update, context):
-    if update.message.from_user.id == robertID:
+    if update.message.from_user.id == config.admin_id:
         filename = 'crossword_times.csv'
         if len(update.message.text.split()) > 1:
             filename = update.message.text.split()[1]
@@ -991,7 +976,7 @@ def overwrite_data_from_csv(update, context):
         context.chat_data['overall'] = overall
         context.chat_data['overallDates'] = overallDates
         context.chat_data['leaderboard'] = calculate_leaderboard(overall, overallDates)
-        context.bot.send_message(doobieID, "Data overwritten from CSV file. Please check accuracy.")
+        context.bot.send_message(config.group_id, "Data overwritten from CSV file. Please check accuracy.")
 
 
 def main():
@@ -1000,7 +985,7 @@ def main():
     # Make sure to set use_context=True to use the new context based callbacks
     # Post version 12 this will no longer be necessary
     botPersistence = PicklePersistence(filename='bot-data')
-    updater = Updater(***REMOVED***, persistence=botPersistence, use_context=True)
+    updater = Updater(config.api_key, persistence=botPersistence, use_context=True)
 
     # Get the dispatcher to register handlers
     dp = updater.dispatcher
@@ -1010,7 +995,6 @@ def main():
     dp.add_handler(CommandHandler("help", help))
     dp.add_handler(CommandHandler("addtime", addtime))
     dp.add_handler(CommandHandler("mytime", mytime))
-    dp.add_handler(CommandHandler("insultmax", insultmax))
     dp.add_handler(CommandHandler("today", currentstandings_manual))
     dp.add_handler(CommandHandler("endday", dailytimes_manual))
     dp.add_handler(CommandHandler("reset", reset))
@@ -1034,7 +1018,7 @@ def main():
     dp.add_handler(CommandHandler("week_best_fit", week_best_fit))
     dp.add_handler(CommandHandler("calendar", calendar))
     dp.add_handler(CommandHandler("pie", pie))
-    #dp.add_handler(CommandHandler("pie_gif", pie_gif))
+    # dp.add_handler(CommandHandler("pie_gif", pie_gif))
     dp.add_handler(CommandHandler("stats", stats))
     dp.add_handler(CommandHandler("total", total))
     dp.add_handler(CommandHandler("month_total", month_total))
