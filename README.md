@@ -3,11 +3,17 @@ A Telegram bot designed to record a groupchat's times for the New York Times Dai
 
 # Functionality
 
+## Basic Use
 - Every day users can send their crossword time in their groupchat (e.g. 1:30) and the bot will record it in the groupchat's daily leaderboard. 
 - Every day when a new crossword is available, the bot will update the groups All-Time leaderboard based on who had the lowest time.
 
-# Additional Features
-## Crossword Stats
+## Reminders 🔔
+If a user in the groupchat doesn't submit a time within one hour of the next crossword day (10 pm EST as per the NYT app), the bot will DM them a friendly reminder, which they can choose to opt out of.
+
+## Streaks 🔥
+If a user is on a hotstreak and has won multiple days in a row, the bot will let them know!
+
+## Crossword Stats 📈
 The bot has 20(!) different commands for visualizing the group's recorded crossword data. Most of these are created using matplotlib and sent as images to the groupchat.
 
 Some that are available:
@@ -33,4 +39,4 @@ Plots the percent of total wins each user has over time. Good for seeing trends 
 
 
 
-*Note I am not as good at crosswords as my amazing friends in these images*
+*Note that I am not as good at crosswords as my amazing friends in these images*
