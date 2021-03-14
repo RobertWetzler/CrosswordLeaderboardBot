@@ -1042,11 +1042,11 @@ def main():
     # EST & UTC: Satuday and Sunday
     sixDays = (5, 6)
     # EST: 10 PM. UTC: 3 AM.
-    t10 = time(3, 0, 0, 0)
-    t9 = time(2, 0, 0, 0)
+    t10 = time(2, 0, 0, 0)
+    t9 = time(1, 0, 0, 0)
     # EST: 6 PM. UTC: 11 PM.
-    t6 = time(23, 0, 0, 0)
-    t5 = time(22, 0, 0, 0)
+    t6 = time(22, 0, 0, 0)
+    t5 = time(21, 0, 0, 0)
     # Job at 10 PM EST Mon - Fri
     ten_pm_days = j.run_daily(dailytimes_job, t10, tenDays)
     remind_9_pm = j.run_daily(remind, t9, tenDays)
