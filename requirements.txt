@@ -26,4 +26,4 @@ seaborn==0.10.1
 six==1.13.0
 soupsieve==1.9.5
 tornado==6.0.3
-urllib3==1.25.7
+urllib3==1.25.8
