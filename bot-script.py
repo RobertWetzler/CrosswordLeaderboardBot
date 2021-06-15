@@ -1,4 +1,3 @@
-
 """
 Crossword Leaderboard Bot
 Pending future changes, all logic is currently tied to only work with our specific groupchat.
@@ -624,7 +623,6 @@ def leaderboard(update, context):
         os.remove("leaderboard.ogg")
 
 
-
 def talk(update, context):
     mg = update.message.text.partition(' ')[2]
     audio = gTTS(text=mg, lang='en', slow=False)
@@ -976,6 +974,16 @@ def overwrite_data_from_csv(update, context):
         context.chat_data['overallDates'] = overallDates
         context.chat_data['leaderboard'] = calculate_leaderboard(overall, overallDates)
         context.bot.send_message(config.group_id, "Data overwritten from CSV file. Please check accuracy.")
+
+
+def add_id(update, context):
+    if 'id_mappings' not in context.chat_data:
+        context.chat_data['id_mappings'] = dict()
+    name = str(update.message.from_user.first_name)
+    id = update.message.from_user.id
+    context.chat_data['id_mappings'][name] = id
+    emoji = random.choice(['🔥', '😘', '😎', '😈', '😩', '😏'])
+    context.bot.send_message(config.group_id, f'Thanks {name} {emoji}. Btw your id is {update.message.from_user.id}')
 
 
 def main():
