@@ -1050,6 +1050,7 @@ def main():
     dp.add_handler(CommandHandler("read_csv", read_csv))
     dp.add_handler(CommandHandler("overwrite_data_from_csv", overwrite_data_from_csv))
     dp.add_handler(CommandHandler("add_id", add_id))
+    dp.add_handler(CommandHandler("populate_database", populate_database))
     # on noncommand i.e message - echo the message on Telegram
     # log all errors
     dp.add_error_handler(error)
