@@ -18,6 +18,7 @@ import copy
 from telegram import ParseMode, Sticker
 from gtts import gTTS
 from datetime import datetime, time, timedelta
+import crossworddata
 from crosswordstats import lineplot, avgtimes, lineplot_best, lineplot_best_fit, calendar_plot, lineplot_best_fit_week, \
     pie_plot, pie_time_plot, total_wins_plot, total_time_plot, best_times, violin_plot, swarm_plot, rankings_plot, \
     percentage_plot
@@ -984,6 +985,13 @@ def add_id(update, context):
     context.chat_data['id_mappings'][name] = id
     emoji = random.choice(['🔥', '😘', '😎', '😈', '😩', '😏'])
     context.bot.send_message(config.group_id, f'Thanks {name} {emoji}. Btw your id is {update.message.from_user.id}')
+
+def populate_database(update, context):
+    if update.message.from_user.id == config.admin_id:
+        crossworddata.create_db_from_scratch(globalChatData)
+        context.bot.send_message(config.group_id,
+                                 f'Database File Populated. Here it is!')
+        context.bot.send_document(config.group_id, document=open('CrosswordDB.db', 'rb'))
 
 
 def main():
