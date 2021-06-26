@@ -5,10 +5,10 @@ def create_db_from_scratch(global_chat_data):
     conn = sqlite3.connect('CrosswordDB.db')
     cur = conn.cursor()
     for chat_id in global_chat_data:
-        chat_data = str(global_chat_data[chat_id])
+        chat_data = global_chat_data[chat_id]
         """Create Groups"""
         group_name = 'The Doobie Brothers'
-        cur.execute("INSERT INTO [group](id, name) VALUES(?,?)", (chat_id, group_name))
+        cur.execute("INSERT INTO [group](id, name) VALUES(?,?)", (str(chat_id), group_name))
         print("First insert passed")
         wins = dict()
         for name in chat_data['id_mappings']:
