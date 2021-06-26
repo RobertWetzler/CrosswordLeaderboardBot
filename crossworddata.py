@@ -5,19 +5,18 @@ def create_db_from_scratch(global_chat_data):
     conn = sqlite3.connect('CrosswordDB.db')
     cur = conn.cursor()
     for chat_id in global_chat_data:
-        chat_data = global_chat_data[chat_id]
+        chat_data = str(global_chat_data[chat_id])
         """Create Groups"""
         group_name = 'The Doobie Brothers'
-        print("Made it here!")
         cur.execute("INSERT INTO [group](id, name) VALUES(?,?)", (chat_id, group_name))
         print("First insert passed")
         wins = dict()
         for name in chat_data['id_mappings']:
             """Create users"""
-            user_id = chat_data['id_mappings'][name]
+            user_id = str(chat_data['id_mappings'][name])
             # God this is so poorly designed
             remind = chat_data['ids'][user_id] if user_id in chat_data['ids'] else True
-            cur.execute("INSERT INTO user(user_id, name, remind) VALUES(?,?,?)", (user_id, name, remind))
+            cur.execute("INSERT INTO user(user_id, name, remind) VALUES(?,?,?)", (user_id, name.lower(), remind))
             print("Second insert passed")
             """Add User to Group"""
             cur.execute("INSERT INTO is_member(user_id, group_id) VALUES(?,?)", (user_id, chat_id))
@@ -59,7 +58,7 @@ def create_db_from_scratch(global_chat_data):
                 wins[name] += 1
         """Insert wins by group"""
         for name in wins:
-            user_id = chat_data['id_mappings'][name]
+            user_id = str(chat_data['id_mappings'][name])
             cur.execute("INSERT INTO wins(user_id, group_id, wins) VALUES(?,?,?)", (user_id, chat_id, wins[name]))
             print("Fifth insert passed")
     conn.commit()
