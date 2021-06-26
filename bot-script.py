@@ -987,6 +987,9 @@ def add_id(update, context):
     context.bot.send_message(config.group_id, f'Thanks {name} {emoji}. Btw your id is {update.message.from_user.id}')
 
 def populate_database(update, context):
+    import json
+    with open("chat_data.json", "w") as file:
+        json.dump(globalChatData, file)
     if update.message.from_user.id == config.admin_id:
         crossworddata.create_db_from_scratch(globalChatData)
         context.bot.send_message(config.group_id,
