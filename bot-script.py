@@ -988,8 +988,12 @@ def add_id(update, context):
 
 def populate_database(update, context):
     import json
+    import copy
+    globalChatDataCopy = copy.deepcopy(globalChatData)
+    for chat_id in globalChatDataCopy:
+        del globalChatDataCopy[chat_id]['pinnedStandings']
     with open("chat_data.json", "w") as file:
-        json.dump(globalChatData, file)
+        json.dump(globalChatDataCopy, file)
     if update.message.from_user.id == config.admin_id:
         crossworddata.create_db_from_scratch(globalChatData)
         context.bot.send_message(config.group_id,
