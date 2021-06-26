@@ -7,8 +7,10 @@ def create_db_from_scratch(global_chat_data):
     for chat_id in global_chat_data:
         chat_data = global_chat_data[chat_id]
         """Create Groups"""
-        group_name = 'The Doobie Brothers' if chat_id == -1001392971649 else f'Telegram Group {chat_id}'
+        group_name = 'The Doobie Brothers'
+        print("Made it here!")
         cur.execute("INSERT INTO [group](id, name) VALUES(?,?)", (chat_id, group_name))
+        print("First insert passed")
         wins = dict()
         for name in chat_data['id_mappings']:
             """Create users"""
@@ -16,8 +18,10 @@ def create_db_from_scratch(global_chat_data):
             # God this is so poorly designed
             remind = chat_data['ids'][user_id] if user_id in chat_data['ids'] else True
             cur.execute("INSERT INTO user(user_id, name, remind) VALUES(?,?,?)", (user_id, name, remind))
+            print("Second insert passed")
             """Add User to Group"""
             cur.execute("INSERT INTO is_member(user_id, group_id) VALUES(?,?)", (user_id, chat_id))
+            print("Third insert passed")
             for i in range(len(chat_data['overall'][name])):
                 # convert date to iso YYYY-MM-DD
                 date = chat_data['overallDates'][i].split('/')
@@ -27,6 +31,7 @@ def create_db_from_scratch(global_chat_data):
                     """Insert Time Entry"""
                     cur.execute("INSERT INTO entry(date, user_id, time) VALUES(?,?,?)",
                                 (date_iso, user_id, time))
+                    print("Fourth insert passed")
             wins[name] = 0
         for date_i in range(len(chat_data['overallDates'])):
             rank = []
@@ -56,6 +61,7 @@ def create_db_from_scratch(global_chat_data):
         for name in wins:
             user_id = chat_data['id_mappings'][name]
             cur.execute("INSERT INTO wins(user_id, group_id, wins) VALUES(?,?,?)", (user_id, chat_id, wins[name]))
+            print("Fifth insert passed")
     conn.commit()
     conn.close()
 
