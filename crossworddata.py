@@ -2,7 +2,7 @@ import sqlite3
 from contextlib import closing
 
 def create_db_from_scratch(global_chat_data):
-    conn = sqlite3.connect('CrosswordTestDB.db')
+    conn = sqlite3.connect('CrosswordDB.db')
     cur = conn.cursor()
     for chat_id in global_chat_data:
         chat_data = global_chat_data[chat_id]
