@@ -2,13 +2,13 @@ import sqlite3
 from contextlib import closing
 
 def create_db_from_scratch(global_chat_data):
-    conn = sqlite3.connect('CrosswordDB.db')
+    conn = sqlite3.connect('CrosswordTestDB.db')
     cur = conn.cursor()
     for chat_id in global_chat_data:
         chat_data = global_chat_data[chat_id]
         """Create Groups"""
         group_name = 'The Doobie Brothers' if chat_id == -1001392971649 else f'Telegram Group {chat_id}'
-        cur.execute("INSERT INTO group(id, name) VALUES(?,?)", (chat_id, group_name))
+        cur.execute("INSERT INTO [group](id, name) VALUES(?,?)", (chat_id, group_name))
         wins = dict()
         for name in chat_data['id_mappings']:
             """Create users"""
@@ -19,12 +19,14 @@ def create_db_from_scratch(global_chat_data):
             """Add User to Group"""
             cur.execute("INSERT INTO is_member(user_id, group_id) VALUES(?,?)", (user_id, chat_id))
             for i in range(len(chat_data['overall'][name])):
-                date = chat_data['overallDates'][i]
+                # convert date to iso YYYY-MM-DD
+                date = chat_data['overallDates'][i].split('/')
+                date_iso = f'{date[2]}-{date[0].zfill(2)}-{date[1].zfill(2)}'
                 time = chat_data['overall'][name][i]
                 if time is not None:
                     """Insert Time Entry"""
-                    cur.execute("INSERT INTO entry(date, user_id, time) VALUES(TO_DATE(?, 'DD/MM/YYYY'),?,?)",
-                                (date, user_id, time))
+                    cur.execute("INSERT INTO entry(date, user_id, time) VALUES(?,?,?)",
+                                (date_iso, user_id, time))
             wins[name] = 0
         for date_i in range(len(chat_data['overallDates'])):
             rank = []
@@ -55,6 +57,7 @@ def create_db_from_scratch(global_chat_data):
             user_id = chat_data['id_mappings'][name]
             cur.execute("INSERT INTO wins(user_id, group_id, wins) VALUES(?,?,?)", (user_id, chat_id, wins[name]))
     conn.commit()
+    conn.close()
 
 
 
