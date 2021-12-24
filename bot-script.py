@@ -762,6 +762,13 @@ def month_total(update, context):
         os.remove('total.png')
 
 
+def year_total(update, context):
+    if update.message.chat_id == config.group_id:
+        total_wins_plot(context.chat_data['overall'], context.chat_data['overallDates'], 'total.png', past_year=True)
+        context.bot.send_photo(chat_id=update.message.chat_id, photo=open('total.png', 'rb'))
+        os.remove('total.png')
+
+
 def total_time(update, context):
     if update.message.chat_id == config.group_id:
         total_time_plot(context.chat_data['overall'], context.chat_data['overallDates'], 'total_time.png')
@@ -773,6 +780,14 @@ def month_total_time(update, context):
     if update.message.chat_id == config.group_id:
         total_time_plot(context.chat_data['overall'], context.chat_data['overallDates'], 'total_time.png',
                         past_month=True)
+        context.bot.send_photo(chat_id=update.message.chat_id, photo=open('total_time.png', 'rb'))
+        os.remove('total_time.png')
+
+
+def year_total_time(update, context):
+    if update.message.chat_id == config.group_id:
+        total_time_plot(context.chat_data['overall'], context.chat_data['overallDates'], 'total_time.png',
+                        past_year=True)
         context.bot.send_photo(chat_id=update.message.chat_id, photo=open('total_time.png', 'rb'))
         os.remove('total_time.png')
 
@@ -794,6 +809,13 @@ def swarm(update, context):
 def month_swarm(update, context):
     if update.message.chat_id == config.group_id:
         swarm_plot(context.chat_data['overall'], context.chat_data['overallDates'], 'swarm.png', past_month=True)
+        context.bot.send_photo(chat_id=update.message.chat_id, photo=open('swarm.png', 'rb'))
+        os.remove('swarm.png')
+
+
+def year_swarm(update, context):
+    if update.message.chat_id == config.group_id:
+        swarm_plot(context.chat_data['overall'], context.chat_data['overallDates'], 'swarm.png', past_year=True)
         context.bot.send_photo(chat_id=update.message.chat_id, photo=open('swarm.png', 'rb'))
         os.remove('swarm.png')
 
@@ -857,6 +879,24 @@ def month_rankings(update, context):
         context.bot.send_message(update.message.chat_id, mg, parse_mode=ParseMode.HTML)
         os.remove('rankings.png')
 
+
+def year_rankings(update, context):
+    if update.message.chat_id == config.group_id:
+        ranks = rankings_plot(context.chat_data['overall'], context.chat_data['overallDates'], 'rankings.png',
+                              past_year=True)
+
+        # Get month name for output message
+        lds = [int(s) for s in context.chat_data['overallDates'][-1].split('/')]
+        last_date = datetime(year=int(lds[2]), month=int(lds[0]), day=int(lds[1]))
+        # Gets year name
+        year = last_date.strftime("%Y")
+        mg = f'<b>Ranked Rankings for {year}:</b>\n'
+
+        for i, name in enumerate(sorted(ranks.keys(), key=ranks.get, reverse=True)):
+            mg += f'<b>{i + 1}</b> {name}: {ranks[name]}\n'
+        context.bot.send_photo(chat_id=update.message.chat_id, photo=open('rankings.png', 'rb'))
+        context.bot.send_message(update.message.chat_id, mg, parse_mode=ParseMode.HTML)
+        os.remove('rankings.png')
 
 def percentages(update, context):
     if update.message.chat_id == config.group_id:
@@ -1044,13 +1084,17 @@ def main():
     dp.add_handler(CommandHandler("stats", stats))
     dp.add_handler(CommandHandler("total", total))
     dp.add_handler(CommandHandler("month_total", month_total))
+    dp.add_handler(CommandHandler("year_total", year_total))
     dp.add_handler(CommandHandler("total_time", total_time))
     dp.add_handler(CommandHandler("month_total_time", month_total_time))
+    dp.add_handler(CommandHandler("year_total_time", year_total_time))
     dp.add_handler(CommandHandler("violin", violin))
     dp.add_handler(CommandHandler("swarm", swarm))
     dp.add_handler(CommandHandler("month_swarm", month_swarm))
+    dp.add_handler(CommandHandler("year_swarm", year_swarm))
     dp.add_handler(CommandHandler("rankings", rankings))
     dp.add_handler(CommandHandler("month_rankings", month_rankings))
+    dp.add_handler(CommandHandler("year_rankings", year_rankings))
     dp.add_handler(CommandHandler("percentages", percentages))
     dp.add_handler(CommandHandler("get_day", get_day))
     dp.add_handler(CommandHandler("write_csv", write_csv))

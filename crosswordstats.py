@@ -221,15 +221,17 @@ def calendar_plot(overall_dict, dates, filename):
     plt.close('all')
 
 
-def total_wins_plot(overall_dict, dates, filename, past_month=False):
+def total_wins_plot(overall_dict, dates, filename, past_month=False, past_year=False):
     fig, ax = plt.subplots()
     wins_dict = {name: [] for name in overall_dict}
-    if past_month:
+    if past_month or past_year:
         # (last date string)
         lds = [int(s) for s in dates[-1].split('/')]
         last_date = dt.datetime(year=int(lds[2]), month=int(lds[0]), day=int(lds[1]))
-        # first date of the month
-        first_date = dt.datetime(year=lds[2], month=lds[0], day=1)
+        # first date of the month/year
+        first_date = dt.datetime(year=lds[2], month=1, day=1)
+        if past_month:
+            first_date = dt.datetime(year=lds[2], month=lds[0], day=1)
         delta = (last_date - first_date).days
         start = len(dates) - 1 - delta
     else:
@@ -261,6 +263,7 @@ def total_wins_plot(overall_dict, dates, filename, past_month=False):
                  dates[start:]]
     for name in wins_dict:
         plt.plot(datetimes, wins_dict[name], '-', label=name, ms=3)
+        plt.text(datetimes[-1], wins_dict[name][-1], wins_dict[name][-1])
     plt.gcf().autofmt_xdate()
     if len(datetimes) <= 5:
         ax.xaxis.set_major_locator(mdates.DayLocator())
@@ -275,6 +278,12 @@ def total_wins_plot(overall_dict, dates, filename, past_month=False):
         # Gets month name
         month = last_date.strftime("%B")
         title += f' for {month}'
+    elif past_year:
+        lds = [int(s) for s in dates[-1].split('/')]
+        last_date = dt.datetime(year=int(lds[2]), month=int(lds[0]), day=int(lds[1]))
+        # Gets month name
+        year = last_date.strftime("%Y")
+        title += f' for {year}'
     plt.title(title)
     plt.legend()
     plt.xlabel('Day')
@@ -282,6 +291,7 @@ def total_wins_plot(overall_dict, dates, filename, past_month=False):
     plt.grid(b=True, which='both')
     plt.savefig(filename, dpi=500)
     plt.close('all')
+    return wins_dict
 
 
 def pie_plot(leaderboard_dict, filename):
@@ -343,15 +353,17 @@ def _update(num, *fargs):
     ax.set_title(dates[num])
 
 
-def total_time_plot(overall_dict, dates, filename, past_month=False):
+def total_time_plot(overall_dict, dates, filename, past_month=False, past_year=False):
     fig, ax = plt.subplots()
     times_dict = {name: [] for name in overall_dict}
-    if past_month:
+    if past_month or past_year:
         # (last date string)
         lds = [int(s) for s in dates[-1].split('/')]
         last_date = dt.datetime(year=int(lds[2]), month=int(lds[0]), day=int(lds[1]))
-        # first date of the month
-        first_date = dt.datetime(year=lds[2], month=lds[0], day=1)
+        # first date of the month/year
+        first_date = dt.datetime(year=lds[2], month=1, day=1)
+        if past_month:
+            first_date = dt.datetime(year=lds[2], month=lds[0], day=1)
         delta = (last_date - first_date).days
         start = len(dates) - 1 - delta
     else:
@@ -402,6 +414,7 @@ def total_time_plot(overall_dict, dates, filename, past_month=False):
     datetimes.append(next_datetime)
     for name in times_dict:
         plt.plot(datetimes, times_dict[name], '.-', label=name, ms=3)
+        plt.text(datetimes[-1], times_dict[name][-1], str(dt.timedelta(seconds=int(times_dict[name][-1]))))
     plt.gcf().autofmt_xdate()
     if len(datetimes) <= 5:
         ax.xaxis.set_major_locator(mdates.DayLocator())
@@ -418,6 +431,12 @@ def total_time_plot(overall_dict, dates, filename, past_month=False):
         # Gets month name
         month = last_date.strftime("%B")
         title += f' for {month}'
+    elif past_year:
+        lds = [int(s) for s in dates[-1].split('/')]
+        last_date = dt.datetime(year=int(lds[2]), month=int(lds[0]), day=int(lds[1]))
+        # Gets month name
+        year = last_date.strftime("%Y")
+        title += f' for {year}'
     plt.title(title)
     plt.legend()
     plt.xlabel('Day')
@@ -466,19 +485,22 @@ def violin_plot(overall_dict, dates, filename):
     plt.close('all')
 
 
-def swarm_plot(overall_dict, dates, filename, past_month=False):
+def swarm_plot(overall_dict, dates, filename, past_month=False, past_year=False):
     fig, ax = plt.subplots(figsize=(12, 5))
     plt.title('Swarm Plot')
     sns.set(style='whitegrid', color_codes=True)
     start = 0
-    if past_month:
+    if past_month or past_year:
         # (last date string)
         lds = [int(s) for s in dates[-1].split('/')]
         last_date = dt.datetime(year=int(lds[2]), month=int(lds[0]), day=int(lds[1]))
-        # first date of the month
-        first_date = dt.datetime(year=lds[2], month=lds[0], day=1)
+        # first date of the month/year
+        first_date = dt.datetime(year=lds[2], month=1, day=1)
+        if past_month:
+            first_date = dt.datetime(year=lds[2], month=lds[0], day=1)
         delta = (last_date - first_date).days
         start = len(dates) - 1 - delta
+
     # Create name column
     # List of each name * number of items stored under that name
     name_col = list(itertools.chain.from_iterable([[n] * len(overall_dict[n][start:]) for n in overall_dict]))
@@ -498,17 +520,19 @@ def swarm_plot(overall_dict, dates, filename, past_month=False):
     plt.close('all')
 
 
-def rankings_plot(overall_dict, dates, filename, past_month=False):
+def rankings_plot(overall_dict, dates, filename, past_month=False, past_year=False):
     fig, ax = plt.subplots()
     scores = [10, 8, 5, 3, 1]
     rank_dict = {name: [] for name in overall_dict}
     start = 0
-    if past_month:
+    if past_month or past_year:
         # (last date string)
         lds = [int(s) for s in dates[-1].split('/')]
         last_date = dt.datetime(year=int(lds[2]), month=int(lds[0]), day=int(lds[1]))
-        # first date of the month
-        first_date = dt.datetime(year=lds[2], month=lds[0], day=1)
+        # first date of the month/year
+        first_date = dt.datetime(year=lds[2], month=1, day=1)
+        if past_month:
+            first_date = dt.datetime(year=lds[2], month=lds[0], day=1)
         delta = (last_date - first_date).days
         start = len(dates) - 1 - delta
     for day_index in range(start, len(dates)):
@@ -579,6 +603,12 @@ def rankings_plot(overall_dict, dates, filename, past_month=False):
         # Gets month name
         month = last_date.strftime("%B")
         title += f' for {month}'
+    elif past_year:
+        lds = [int(s) for s in dates[-1].split('/')]
+        last_date = dt.datetime(year=int(lds[2]), month=int(lds[0]), day=int(lds[1]))
+        # Gets month name
+        year = last_date.strftime("%Y")
+        title += f' for {year}'
     plt.title(title)
     plt.legend()
     plt.xlabel('Day')
